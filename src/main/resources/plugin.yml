@@ -1,0 +1,11 @@
+name: "UxI"
+author: "Wyrdix"
+description: "User Extra Interface should be implemented by plugins and administrators to create many very different interfaces"
+load: POSTWORLD
+website: "github.com/Wyrdix"
+api-version: 1.16
+default-permission: op
+prefix: "UxI"
+database: false
+version: "$version"
+main: fr.wyrdix.UxiPlugin

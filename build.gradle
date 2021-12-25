@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+}
+
+compileJava.options.encoding = 'UTF-8'
+
+group 'fr.wyrdix'
+version '1.0-SNAPSHOT'
+
+
+
+repositories {
+    mavenCentral()
+
+    maven { url = uri("https://papermc.io/repo/repository/maven-public/") }
+}
+
+processResources {
+    filesMatching('plugin.yml') {
+        expand 'version': "$version"
+    }
+}
+
+
+dependencies {
+
+    compileOnly("com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT")
+}
