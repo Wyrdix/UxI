@@ -15,9 +15,9 @@ public final class GuiLayout {
     private GuiLayout() {
     }
 
-    public void fromStringLayout(@NonNull GuiSection section,
-                                 @NonNull String[] layout,
-                                 @NonNull Map<Character, ItemComponent> itemComponentMap) {
+    public static void fromStringLayout(@NonNull GuiSection section,
+                                        @NonNull String[] layout,
+                                        @NonNull Map<Character, ItemComponent> itemComponentMap) {
         Validate.notNull(section);
         Validate.notNull(layout);
         Validate.notNull(itemComponentMap);
@@ -32,9 +32,9 @@ public final class GuiLayout {
         fromStringLayoutWithFunction(section, layout, toFunction);
     }
 
-    public void fromStringLayoutWithFunction(@NonNull GuiSection section,
-                                             @NonNull String[] layout,
-                                             @NonNull Map<Character, Function<GuiPosition, ItemComponent>> itemComponentMap) {
+    public static void fromStringLayoutWithFunction(@NonNull GuiSection section,
+                                                    @NonNull String[] layout,
+                                                    @NonNull Map<Character, Function<GuiPosition, ItemComponent>> itemComponentMap) {
         Validate.notNull(section);
         Validate.notNull(layout);
         Validate.notNull(itemComponentMap);
@@ -51,7 +51,7 @@ public final class GuiLayout {
         }
     }
 
-    public void fillLayout(@NonNull GuiSection section, @NonNull Function<GuiPosition, ItemComponent> itemCreator) {
+    public static void fillLayout(@NonNull GuiSection section, @NonNull Function<GuiPosition, ItemComponent> itemCreator) {
         Validate.notNull(section);
         Validate.notNull(itemCreator);
 
