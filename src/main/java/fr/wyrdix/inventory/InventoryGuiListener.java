@@ -1,10 +1,7 @@
 package fr.wyrdix.inventory;
 
 import com.google.common.collect.ImmutableList;
-import fr.wyrdix.inventory.component.ClickReactionComponent;
-import fr.wyrdix.inventory.component.Component;
-import fr.wyrdix.inventory.component.ItemComponent;
-import fr.wyrdix.inventory.component.PersonalComponent;
+import fr.wyrdix.inventory.component.*;
 import fr.wyrdix.inventory.event.InventoryGuiClickEvent;
 import fr.wyrdix.inventory.event.InventoryGuiCloseEvent;
 import fr.wyrdix.inventory.event.InventoryGuiComponentAddEvent;
@@ -81,10 +78,30 @@ public class InventoryGuiListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onComponentAddition(InventoryGuiComponentAddEvent event) {
         event.getComponent().onAddition(event.getSection());
+
+        if (event.getComponent() instanceof ItemComponent itemComponent) {
+            ItemPanelComponent panelComponent = event.getSection().getFromComponent(ItemPanelComponent.class).orElseGet(() -> {
+                ItemPanelComponent component = new ItemPanelComponent(event.getSection());
+                event.getSection().addComponent(component);
+                return component;
+            });
+
+            panelComponent.setItem(itemComponent);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onComponentDeletion(InventoryGuiComponentRemoveEvent event) {
         event.getComponent().onDeletion(event.getSection());
+
+        if (event.getComponent() instanceof ItemComponent itemComponent) {
+            ItemPanelComponent panelComponent = event.getSection().getFromComponent(ItemPanelComponent.class).orElseGet(() -> {
+                ItemPanelComponent component = new ItemPanelComponent(event.getSection());
+                event.getSection().addComponent(component);
+                return component;
+            });
+
+            panelComponent.setItem(new ItemComponent(itemComponent.getPosition(), null));
+        }
     }
 }

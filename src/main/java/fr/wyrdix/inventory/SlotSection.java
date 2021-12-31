@@ -2,12 +2,13 @@ package fr.wyrdix.inventory;
 
 import com.google.common.collect.ImmutableSet;
 import fr.wyrdix.inventory.component.Component;
+import fr.wyrdix.inventory.component.ItemComponent;
 import fr.wyrdix.inventory.exceptions.InventoryGuiSectionOutOfFields;
+import fr.wyrdix.inventory.section.GuiSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -63,13 +64,28 @@ public class SlotSection implements GuiSection {
     }
 
     @Override
-    public @Nullable ItemStack getItem(@NotNull GuiPosition position, @NotNull Player player) {
+    public @Nullable ItemStack getItem(@NonNull GuiPosition position, @NonNull Player player) {
         return parent.getItem(getParentFields().get(position.getIndex()), player);
     }
 
     @Override
-    public void setItem(@NotNull GuiPosition position, @NotNull Player player, @NotNull ItemStack item) {
+    public void setItem(@NonNull GuiPosition position, @NonNull Player player, @NonNull ItemStack item) {
         parent.setItem(getParentFields().get(position.getIndex()), player, item);
+    }
+
+    @Override
+    public void setItem(@NonNull ItemComponent component) {
+        parent.setItem(component.clone(component.getPosition().project(parent)));
+    }
+
+    @Override
+    public void addComponent(@NonNull Component component) {
+
+    }
+
+    @Override
+    public void removeComponent(@NonNull Component component) {
+
     }
 
     public int getSlot() {

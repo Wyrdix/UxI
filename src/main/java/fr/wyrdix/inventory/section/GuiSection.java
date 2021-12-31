@@ -1,16 +1,16 @@
-package fr.wyrdix.inventory;
+package fr.wyrdix.inventory.section;
 
+import fr.wyrdix.inventory.GuiPosition;
+import fr.wyrdix.inventory.InventoryGui;
 import fr.wyrdix.inventory.component.Component;
+import fr.wyrdix.inventory.component.ItemComponent;
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 public interface GuiSection {
@@ -22,6 +22,14 @@ public interface GuiSection {
     @NonNull Set<GuiSection> getSubSections();
 
     @NonNull Set<Component> getComponents();
+
+    @SuppressWarnings("unchecked")
+    default @NonNull <T> Optional<T> getFromComponent(@NonNull Class<T> clazz) {
+        for (Component component : getComponents()) {
+            if (clazz.isInstance(component)) return Optional.of((T) component);
+        }
+        return Optional.empty();
+    }
 
     @Nullable GuiSection getParent();
 
@@ -72,5 +80,9 @@ public interface GuiSection {
 
     void setItem(@NonNull GuiPosition position, @NonNull Player player, @NonNull ItemStack item);
 
+    void setItem(@NonNull ItemComponent component);
 
+    void addComponent(@NonNull Component component);
+
+    void removeComponent(@NonNull Component component);
 }

@@ -1,6 +1,7 @@
 package fr.wyrdix.inventory;
 
 import fr.wyrdix.inventory.exceptions.InventoryGuiSectionOutOfFields;
+import fr.wyrdix.inventory.section.GuiSection;
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;

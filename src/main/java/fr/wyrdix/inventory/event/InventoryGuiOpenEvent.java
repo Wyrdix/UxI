@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.jetbrains.annotations.NotNull;
 
 public class InventoryGuiOpenEvent extends GuiEvent implements Cancellable {
 
@@ -22,7 +21,7 @@ public class InventoryGuiOpenEvent extends GuiEvent implements Cancellable {
     }
 
     @Override
-    public @NotNull HandlerList getHandlers() {
+    public @NonNull HandlerList getHandlers() {
         return HANDLER_LIST;
     }
 

@@ -1,12 +1,11 @@
 package fr.wyrdix.inventory.event;
 
-import fr.wyrdix.inventory.GuiSection;
 import fr.wyrdix.inventory.component.Component;
+import fr.wyrdix.inventory.section.GuiSection;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.jetbrains.annotations.NotNull;
 
 public class InventoryGuiComponentAddEvent extends Event implements Cancellable {
 
@@ -26,7 +25,7 @@ public class InventoryGuiComponentAddEvent extends Event implements Cancellable 
     }
 
     @Override
-    public @NotNull HandlerList getHandlers() {
+    public @NonNull HandlerList getHandlers() {
         return HANDLER_LIST;
     }
 

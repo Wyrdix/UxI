@@ -1,9 +1,9 @@
 package fr.wyrdix.inventory.event;
 
 import fr.wyrdix.inventory.GuiPosition;
-import fr.wyrdix.inventory.GuiSection;
 import fr.wyrdix.inventory.InventoryGui;
 import fr.wyrdix.inventory.SlotSection;
+import fr.wyrdix.inventory.section.GuiSection;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -13,7 +13,6 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -84,7 +83,7 @@ public class InventoryGuiClickEvent extends GuiEvent implements Cancellable {
     }
 
     @Override
-    public @NotNull HandlerList getHandlers() {
+    public @NonNull HandlerList getHandlers() {
         return HANDLER_LIST;
     }
 

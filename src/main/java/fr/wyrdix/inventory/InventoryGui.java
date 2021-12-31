@@ -13,6 +13,7 @@ import fr.wyrdix.inventory.event.InventoryGuiOpenEvent;
 import fr.wyrdix.inventory.exceptions.InventoryGuiPlayerLimitException;
 import fr.wyrdix.inventory.exceptions.InventoryGuiSectionOutOfFields;
 import fr.wyrdix.inventory.exceptions.UnknownPlayerException;
+import fr.wyrdix.inventory.section.GuiSection;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -23,7 +24,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -39,7 +39,6 @@ public abstract class InventoryGui implements GuiSection {
     private final List<GuiPosition> fields;
     private final Set<Component> components = new HashSet<>();
     private final Set<GuiSection> guiSections = new HashSet<>();
-    private final Map<GuiPosition, List<ItemComponent>> itemComponentMap = new HashMap<>();
 
     private final Map<UUID, GuiInstance<?>> guiInstanceMap = new HashMap<>();
 
@@ -59,7 +58,6 @@ public abstract class InventoryGui implements GuiSection {
             GuiPosition position = s.toGuiPosition(this);
             this.fields.add(position);
             this.guiSections.add(new SlotSection(this, position.getIndex()));
-            itemComponentMap.put(position, new ArrayList<>());
         });
 
         size = this.fields.size();
@@ -144,17 +142,12 @@ public abstract class InventoryGui implements GuiSection {
         return viewers.remove(player);
     }
 
-    public void addComponent(Component component) {
+    public void addComponent(@NonNull Component component) {
         Validate.notNull(component);
 
         InventoryGuiComponentAddEvent event = new InventoryGuiComponentAddEvent(this, component);
         Bukkit.getPluginManager().callEvent(event);
-        if (!event.isCancelled()) {
-            components.add(component);
-            if (component instanceof ItemComponent itemComponent) {
-                itemComponentMap.get(itemComponent.getPosition()).add(itemComponent);
-            }
-        }
+        if (!event.isCancelled()) components.add(component);
     }
 
     public void removeComponent(@NonNull Component component) {
@@ -162,12 +155,7 @@ public abstract class InventoryGui implements GuiSection {
 
         InventoryGuiComponentRemoveEvent event = new InventoryGuiComponentRemoveEvent(this, component);
         Bukkit.getPluginManager().callEvent(event);
-        if (!event.isCancelled()) {
-            components.remove(component);
-            if (component instanceof ItemComponent itemComponent) {
-                itemComponentMap.get(itemComponent.getPosition()).remove(component);
-            }
-        }
+        if (!event.isCancelled()) components.remove(component);
     }
 
     public void addSection(@NonNull GuiSection section) throws InventoryGuiSectionOutOfFields {
@@ -216,7 +204,7 @@ public abstract class InventoryGui implements GuiSection {
     }
 
     @Override
-    public void setItem(@NotNull GuiPosition position, @NotNull Player player, @NotNull ItemStack item) {
+    public void setItem(@NonNull GuiPosition position, @NonNull Player player, @NonNull ItemStack item) {
         Validate.notNull(position);
         Validate.notNull(player);
 
@@ -225,6 +213,12 @@ public abstract class InventoryGui implements GuiSection {
 
         addComponent(new PersonalItemComponent(position, item, player));
         instance.getInventory().setItem(position.getIndex(), item);
+    }
+
+    @Override
+    public void setItem(@NonNull ItemComponent component) {
+        Validate.notNull(component);
+        addComponent(component.clone(component.getPosition().project(this)));
     }
 
     protected abstract GuiInstance<?> createInstance(UUID uuid);
