@@ -1,13 +1,12 @@
 plugins {
-    id 'java'
+    id 'java-library'
+    id 'maven-publish'
 }
 
 compileJava.options.encoding = 'UTF-8'
 
-group 'fr.wyrdix'
+group 'com.github.wyrdix'
 version '1.0-SNAPSHOT'
-
-
 
 repositories {
     mavenCentral()
@@ -21,10 +20,22 @@ processResources {
     }
 }
 
-
 dependencies {
-
     compileOnly("com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT")
 }
-sourceCompatibility = JavaVersion.VERSION_16
+
+publishing {
+    publications {
+        myPublication(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
+}
+
+//noinspection GroovyUnusedAssignment
 targetCompatibility = JavaVersion.VERSION_16
+//noinspection GroovyUnusedAssignment
+sourceCompatibility = JavaVersion.VERSION_16
