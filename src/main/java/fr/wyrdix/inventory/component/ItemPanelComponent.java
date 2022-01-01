@@ -3,7 +3,6 @@ package fr.wyrdix.inventory.component;
 import fr.wyrdix.inventory.GuiPosition;
 import fr.wyrdix.inventory.section.GuiSection;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +26,7 @@ public class ItemPanelComponent implements Component {
         }
     }
 
-    public @Nullable ItemComponent getItem(GuiPosition position) {
+    public @NonNull ItemComponent getItem(GuiPosition position) {
         return itemComponentMap.get(position);
     }
 

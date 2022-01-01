@@ -2,10 +2,7 @@ package fr.wyrdix.inventory;
 
 import com.google.common.collect.ImmutableSet;
 import fr.wyrdix.UxiPlugin;
-import fr.wyrdix.inventory.component.Component;
-import fr.wyrdix.inventory.component.ItemComponent;
-import fr.wyrdix.inventory.component.PersonalComponent;
-import fr.wyrdix.inventory.component.PersonalItemComponent;
+import fr.wyrdix.inventory.component.*;
 import fr.wyrdix.inventory.event.InventoryGuiCloseEvent;
 import fr.wyrdix.inventory.event.InventoryGuiComponentAddEvent;
 import fr.wyrdix.inventory.event.InventoryGuiComponentRemoveEvent;
@@ -237,6 +234,7 @@ public abstract class InventoryGui implements GuiSection {
             this.owner = owner;
 
             inventory = createInventory();
+            updateInventory();
         }
 
         public T getGui() {
@@ -248,6 +246,15 @@ public abstract class InventoryGui implements GuiSection {
         }
 
         protected abstract Inventory createInventory();
+
+        public void updateInventory() {
+            Optional<ItemPanelComponent> opt = gui.getFromComponent(ItemPanelComponent.class);
+            opt.ifPresent(itemPanelComponent -> {
+                for (GuiPosition field : gui.getFields()) {
+                    inventory.setItem(field.getIndex(), itemPanelComponent.getItem(field).getItem(gui, Bukkit.getPlayer(owner)));
+                }
+            });
+        }
 
         public Inventory getInventory() {
             return inventory;

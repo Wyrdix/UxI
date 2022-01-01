@@ -5,36 +5,20 @@ import fr.wyrdix.inventory.section.GuiSection;
 import org.apache.commons.lang.Validate;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
 
 public final class GuiLayout {
 
+    private static final Function<GuiPosition, ItemComponent> AIR_CREATOR = (position -> new ItemComponent(position, null));
+
     private GuiLayout() {
     }
 
     public static void fromStringLayout(@NonNull GuiSection section,
                                         @NonNull String[] layout,
-                                        @NonNull Map<Character, ItemComponent> itemComponentMap) {
-        Validate.notNull(section);
-        Validate.notNull(layout);
-        Validate.notNull(itemComponentMap);
-
-
-        Map<Character, Function<GuiPosition, ItemComponent>> toFunction = new HashMap<>();
-
-        for (Map.Entry<Character, ItemComponent> entry : itemComponentMap.entrySet()) {
-            toFunction.put(entry.getKey(), (position -> entry.getValue().clone(position)));
-        }
-
-        fromStringLayoutWithFunction(section, layout, toFunction);
-    }
-
-    public static void fromStringLayoutWithFunction(@NonNull GuiSection section,
-                                                    @NonNull String[] layout,
-                                                    @NonNull Map<Character, Function<GuiPosition, ItemComponent>> itemComponentMap) {
+                                        @NonNull Map<Character, Function<GuiPosition, ItemComponent>> itemComponentMap) {
         Validate.notNull(section);
         Validate.notNull(layout);
         Validate.notNull(itemComponentMap);
@@ -47,7 +31,7 @@ public final class GuiLayout {
 
             char c = line.charAt(field.getX());
 
-            section.setItem(itemComponentMap.get(c).apply(field));
+            section.setItem(itemComponentMap.getOrDefault(c, AIR_CREATOR).apply(field));
         }
     }
 
