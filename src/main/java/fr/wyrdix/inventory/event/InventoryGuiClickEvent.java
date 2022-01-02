@@ -33,7 +33,6 @@ public class InventoryGuiClickEvent extends GuiEvent implements Cancellable {
         Validate.notNull(player);
         Validate.notNull(section);
         Validate.notNull(position);
-        Validate.isTrue(section.isSlot());
         this.nativeEvent = event;
         this.position = position;
         this.section = section;
