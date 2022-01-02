@@ -11,6 +11,7 @@ import fr.wyrdix.inventory.exceptions.InventoryGuiPlayerLimitException;
 import fr.wyrdix.inventory.exceptions.InventoryGuiSectionOutOfFields;
 import fr.wyrdix.inventory.exceptions.UnknownPlayerException;
 import fr.wyrdix.inventory.section.GuiSection;
+import fr.wyrdix.inventory.section.SlotSection;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;

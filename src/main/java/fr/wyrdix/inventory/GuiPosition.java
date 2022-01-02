@@ -18,7 +18,7 @@ public class GuiPosition {
     private final int y;
     private int index = -1;
 
-    GuiPosition(@NonNull GuiSection section, int index, int x, int y) {
+    public GuiPosition(@NonNull GuiSection section, int index, int x, int y) {
         Validate.notNull(section);
         this.section = section;
         this.index = index;

@@ -2,8 +2,8 @@ package fr.wyrdix.inventory.event;
 
 import fr.wyrdix.inventory.GuiPosition;
 import fr.wyrdix.inventory.InventoryGui;
-import fr.wyrdix.inventory.SlotSection;
 import fr.wyrdix.inventory.section.GuiSection;
+import fr.wyrdix.inventory.section.SlotSection;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;

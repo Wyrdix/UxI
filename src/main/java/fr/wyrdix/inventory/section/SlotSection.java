@@ -1,10 +1,9 @@
-package fr.wyrdix.inventory;
+package fr.wyrdix.inventory.section;
 
 import com.google.common.collect.ImmutableSet;
+import fr.wyrdix.inventory.GuiPosition;
 import fr.wyrdix.inventory.component.Component;
 import fr.wyrdix.inventory.component.ItemComponent;
-import fr.wyrdix.inventory.exceptions.InventoryGuiSectionOutOfFields;
-import fr.wyrdix.inventory.section.GuiSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -25,17 +24,10 @@ public class SlotSection implements GuiSection {
     private final int slot;
 
     public SlotSection(GuiSection parent, int slot) {
-        List<GuiPosition> tempFields;
         this.parent = parent;
         this.slot = slot;
-        try {
-            tempFields = Collections.singletonList(new GuiPosition(parent, slot));
-        } catch (InventoryGuiSectionOutOfFields e) {
-            tempFields = Collections.emptyList();
-            e.printStackTrace();
-        }
-        this.fields = tempFields;
-        this.parentFields = Collections.singletonList(tempFields.get(0).project(parent));
+        this.fields = Collections.singletonList(new GuiPosition(this, slot, 0, 0));
+        this.parentFields = Collections.singletonList(parent.getFields().get(slot));
     }
 
     @Override
@@ -44,7 +36,7 @@ public class SlotSection implements GuiSection {
     }
 
     @Override
-    public List<GuiPosition> getParentFields() {
+    public @NonNull List<GuiPosition> getParentFields() {
         return parentFields;
     }
 
