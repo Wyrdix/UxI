@@ -26,9 +26,8 @@ import java.util.*;
 
 public abstract class InventoryGui implements GuiSection {
 
+    private static final NamespacedKey INVENTORY_GUI_NAMESPACEKEY = new NamespacedKey(UxiPlugin.getInstance(), "gui_inventory_id");
     static final Map<Integer, InventoryGui> INVENTORY_GUIS = new HashMap<>();
-    static final NamespacedKey INVENTORY_GUI_NAMESPACEKEY = new NamespacedKey(UxiPlugin.getInstance(), "gui_inventory_id");
-
     private static int ID_COUNTER = 0;
 
 
@@ -78,6 +77,20 @@ public abstract class InventoryGui implements GuiSection {
         return fields;
     }
 
+    public static Optional<InventoryGui> getOpenedInventory(@NonNull Player player) {
+        Validate.notNull(player);
+        Validate.isTrue(player.isOnline());
+
+        Integer id = player.getPersistentDataContainer().get(InventoryGui.INVENTORY_GUI_NAMESPACEKEY, PersistentDataType.INTEGER);
+        if (id == null) return Optional.empty();
+        InventoryGui gui = InventoryGui.INVENTORY_GUIS.get(id);
+        return Optional.ofNullable(gui);
+    }
+
+    public boolean close(@NonNull Player player) {
+        return close(player, false);
+    }
+
     public boolean open(@NonNull Player player) throws UnknownPlayerException, InventoryGuiPlayerLimitException {
         Validate.notNull(player);
         if (!player.isOnline()) throw new UnknownPlayerException();
@@ -89,54 +102,15 @@ public abstract class InventoryGui implements GuiSection {
         if (event.isCancelled()) return false;
 
         viewers.add(player);
-
+        player.getPersistentDataContainer().set(INVENTORY_GUI_NAMESPACEKEY, PersistentDataType.INTEGER, id);
         GuiInstance<?> instance = guiInstanceMap.computeIfAbsent(player.getUniqueId(), this::createInstance);
+
+        instance.updateInventory();
         player.openInventory(instance.inventory);
         instance.setOpen(true);
 
-        player.getPersistentDataContainer().set(INVENTORY_GUI_NAMESPACEKEY, PersistentDataType.INTEGER, id);
 
         return true;
-    }
-
-    public boolean close(@NonNull Player player) {
-        return close(player, false);
-    }
-
-    public boolean close(@NonNull Player player, boolean onEvent) {
-        Validate.notNull(player);
-
-        GuiInstance<?> instance = guiInstanceMap.get(player.getUniqueId());
-
-        if (instance == null) return false;
-
-        InventoryGuiCloseEvent closeEvent = new InventoryGuiCloseEvent(this, player);
-        Bukkit.getPluginManager().callEvent(closeEvent);
-
-        if (closeEvent.isCancelled()) {
-            player.openInventory(instance.getInventory());
-            return false;
-        }
-
-        instance.setOpen(false);
-
-        player.getPersistentDataContainer().set(INVENTORY_GUI_NAMESPACEKEY, PersistentDataType.INTEGER, -1);
-
-        if (getOptions().isGuiCleanup()) guiInstanceMap.remove(player.getUniqueId());
-
-        if (onEvent || !player.getOpenInventory().getTopInventory().equals(instance.getInventory())) {
-            viewers.remove(player);
-            return false;
-        }
-
-        player.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
-
-        components.forEach(s -> {
-            if (s instanceof PersonalComponent && ((PersonalComponent) s).getPlayer().getUniqueId().equals(player.getUniqueId()))
-                removeComponent(s);
-        });
-
-        return viewers.remove(player);
     }
 
     public void addComponent(@NonNull Component component) {
@@ -160,6 +134,42 @@ public abstract class InventoryGui implements GuiSection {
         if (!isDistinct(section)) throw new InventoryGuiSectionOutOfFields();
 
         guiSections.add(section);
+    }
+
+    public boolean close(@NonNull Player player, boolean onEvent) {
+        Validate.notNull(player);
+
+        GuiInstance<?> instance = guiInstanceMap.get(player.getUniqueId());
+
+        if (instance == null) return false;
+
+        InventoryGuiCloseEvent closeEvent = new InventoryGuiCloseEvent(this, player, getOptions().isGuiCleanup());
+        Bukkit.getPluginManager().callEvent(closeEvent);
+
+        if (closeEvent.isCancelled()) {
+            player.openInventory(instance.getInventory());
+            return false;
+        }
+
+        instance.setOpen(false);
+
+        player.getPersistentDataContainer().set(INVENTORY_GUI_NAMESPACEKEY, PersistentDataType.INTEGER, -1);
+
+        if (closeEvent.isInstanceRemoved()) guiInstanceMap.remove(player.getUniqueId());
+
+        if (onEvent || !player.getOpenInventory().getTopInventory().equals(instance.getInventory())) {
+            viewers.remove(player);
+            return false;
+        }
+
+        player.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
+
+        components.forEach(s -> {
+            if (s instanceof PersonalComponent && ((PersonalComponent) s).getPlayer().getUniqueId().equals(player.getUniqueId()))
+                removeComponent(s);
+        });
+
+        return viewers.remove(player);
     }
 
     public boolean removeSection(GuiSection section) {
@@ -220,7 +230,15 @@ public abstract class InventoryGui implements GuiSection {
 
     protected abstract GuiInstance<?> createInstance(UUID uuid);
 
-    protected static abstract class GuiInstance<T extends InventoryGui> {
+    public GuiInstance<?> getInstance(UUID uuid) {
+        return guiInstanceMap.get(uuid);
+    }
+
+    public void removeInstance(UUID uuid) {
+        guiInstanceMap.remove(uuid);
+    }
+
+    public static abstract class GuiInstance<T extends InventoryGui> {
 
         private final T gui;
         private final UUID owner;
@@ -234,7 +252,6 @@ public abstract class InventoryGui implements GuiSection {
             this.owner = owner;
 
             inventory = createInventory();
-            updateInventory();
         }
 
         public T getGui() {

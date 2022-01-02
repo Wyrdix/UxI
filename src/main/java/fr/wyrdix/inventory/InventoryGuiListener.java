@@ -12,7 +12,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.persistence.PersistentDataType;
 
 public class InventoryGuiListener implements Listener {
     public InventoryGuiListener() {
@@ -26,13 +25,11 @@ public class InventoryGuiListener implements Listener {
 
         Player player = (Player) event.getWhoClicked();
 
-        Integer id = player.getPersistentDataContainer().get(InventoryGui.INVENTORY_GUI_NAMESPACEKEY, PersistentDataType.INTEGER);
-        InventoryGui gui = InventoryGui.INVENTORY_GUIS.get(id);
-        if (gui == null) return;
+        InventoryGui.getOpenedInventory(player).ifPresent(gui -> {
+            boolean cancelled = InventoryGuiClickEvent.generateEvent(event, gui, gui, player, event.getSlot(), false);
 
-        boolean cancelled = InventoryGuiClickEvent.generateEvent(event, gui, gui, player, event.getSlot(), false);
-
-        if (cancelled) event.setCancelled(true);
+            event.setCancelled(!cancelled);
+        });
 
     }
 
@@ -43,7 +40,7 @@ public class InventoryGuiListener implements Listener {
                 react.onClick(event.getGui(), event.getPosition(), event.getPlayer());
             }
 
-            if (component instanceof ItemComponent itemComponent) {
+            if (component instanceof ItemComponent itemComponent && itemComponent.getPosition().equals(event.getPosition())) {
                 itemComponent.onClick(event, event.getSection(), event.getPlayer());
             }
         }
@@ -54,10 +51,9 @@ public class InventoryGuiListener implements Listener {
     public void onClose(InventoryCloseEvent event) {
         Player player = (Player) event.getPlayer();
         if (event.getReason() == InventoryCloseEvent.Reason.PLAYER) {
-            Integer id = player.getPersistentDataContainer().get(InventoryGui.INVENTORY_GUI_NAMESPACEKEY, PersistentDataType.INTEGER);
-            InventoryGui gui = InventoryGui.INVENTORY_GUIS.get(id);
-            if (gui == null) return;
-            gui.close(player, true);
+
+            InventoryGui.getOpenedInventory(player).ifPresent(gui -> gui.close(player, true));
+
         }
     }
 

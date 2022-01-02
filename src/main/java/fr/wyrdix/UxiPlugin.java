@@ -1,5 +1,6 @@
 package fr.wyrdix;
 
+import fr.wyrdix.inventory.InventoryGui;
 import fr.wyrdix.inventory.InventoryGuiListener;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
@@ -39,6 +40,9 @@ public class UxiPlugin extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        Bukkit.getOnlinePlayers().forEach(player -> InventoryGui.getOpenedInventory(player).ifPresent(s -> player.closeInventory()));
+
+
         getLogger().info("Uxi is now disabled");
     }
 }
