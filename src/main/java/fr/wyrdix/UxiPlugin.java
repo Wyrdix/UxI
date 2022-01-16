@@ -2,6 +2,7 @@ package fr.wyrdix;
 
 import fr.wyrdix.inventory.InventoryGui;
 import fr.wyrdix.inventory.InventoryGuiListener;
+import fr.wyrdix.inventory.component.click.ChatStringInputListener;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.event.Listener;
@@ -35,7 +36,11 @@ public class UxiPlugin extends JavaPlugin implements Listener {
 
         getLogger().info("Uxi is now enabled");
 
+        //Main Listener
         Bukkit.getPluginManager().registerEvents(new InventoryGuiListener(), this);
+
+        //Extra Listener
+        Bukkit.getPluginManager().registerEvents(new ChatStringInputListener(), this);
     }
 
     @Override
