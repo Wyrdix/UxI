@@ -251,6 +251,8 @@ public abstract class InventoryGui extends SimpleGuiSection {
         private final UUID owner;
         private final Inventory inventory;
 
+        private final Map<GuiSection, Map<String, Object>> sectionPropertyMap = new HashMap<>();
+
         private boolean isOpen = false;
 
         public GuiInstance(@NonNull T gui, @NonNull UUID owner) {
@@ -276,7 +278,9 @@ public abstract class InventoryGui extends SimpleGuiSection {
             opt.ifPresent(panelComponent -> {
                 for (GuiPosition field : gui.getFields()) {
                     panelComponent.getItem(field).ifPresent(item -> {
-                        inventory.setItem(field.project(gui).getIndex(), item.getItem(gui, Objects.requireNonNull(Bukkit.getPlayer(owner))));
+                        ItemStack itemStack = item.getItem(gui, Objects.requireNonNull(Bukkit.getPlayer(owner)));
+                        if (itemStack == null) return;
+                        inventory.setItem(field.project(gui).getIndex(), itemStack);
                     });
                 }
             });
@@ -287,11 +291,23 @@ public abstract class InventoryGui extends SimpleGuiSection {
             for (GuiSection subSection : section.getSubSections()) {
                 subSection.getFromComponent(ItemPanelComponent.class).ifPresent(panelComponent -> {
                     for (Map.Entry<GuiPosition, ItemComponent> entry : panelComponent.getItemComponentMap().entrySet()) {
-                        getInventory().setItem(entry.getKey().project(getGui()).getIndex(), entry.getValue().getItem(getGui(), Objects.requireNonNull(Bukkit.getPlayer(getOwner()))));
+                        ItemStack item = entry.getValue().getItem(getGui(), Objects.requireNonNull(Bukkit.getPlayer(getOwner())));
+                        if (item == null) continue;
+                        getInventory().setItem(entry.getKey().project(getGui()).getIndex(), item);
                     }
                 });
                 recUpdate(subSection);
             }
+        }
+
+        @SuppressWarnings("unchecked")
+        public <U> Optional<U> get(GuiSection section, String key) {
+            return Optional.ofNullable(((U) sectionPropertyMap.getOrDefault(section, Collections.emptyMap()).getOrDefault(key, null)));
+        }
+
+        public void set(GuiSection section, String key, Object object) {
+            Map<String, Object> map = sectionPropertyMap.computeIfAbsent(section, s -> new HashMap<>());
+            map.put(key, object);
         }
 
         public Inventory getInventory() {
