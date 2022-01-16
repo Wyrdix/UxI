@@ -52,8 +52,7 @@ public class InventoryGuiClickEvent extends GuiEvent implements Cancellable {
 
         SlotSection slotSection = new SlotSection(guiSection, slot);
 
-        InventoryGuiClickEvent event = new InventoryGuiClickEvent(nativeEvent, gui, player, guiSection, gui.getFields().get(slot));
-
+        InventoryGuiClickEvent event = new InventoryGuiClickEvent(nativeEvent, gui, player, guiSection, guiSection.getFields().get(slot));
 
         event.setCancelled(cancelled);
 

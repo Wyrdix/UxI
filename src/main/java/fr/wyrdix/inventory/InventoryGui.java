@@ -11,6 +11,7 @@ import fr.wyrdix.inventory.exceptions.InventoryGuiPlayerLimitException;
 import fr.wyrdix.inventory.exceptions.InventoryGuiSectionOutOfFields;
 import fr.wyrdix.inventory.exceptions.UnknownPlayerException;
 import fr.wyrdix.inventory.section.GuiSection;
+import fr.wyrdix.inventory.section.SimpleGuiSection;
 import fr.wyrdix.inventory.section.SlotSection;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
@@ -22,10 +23,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public abstract class InventoryGui implements GuiSection {
+public abstract class InventoryGui extends SimpleGuiSection {
 
     private static final NamespacedKey INVENTORY_GUI_NAMESPACEKEY = new NamespacedKey(UxiPlugin.getInstance(), "gui_inventory_id");
     static final Map<Integer, InventoryGui> INVENTORY_GUIS = new HashMap<>();
@@ -49,6 +51,7 @@ public abstract class InventoryGui implements GuiSection {
     }
 
     public InventoryGui(List<GuiPosition.UnsafeGuiPosition> fields, GuiOptions options) {
+        super(null);
         Validate.notNull(fields);
         this.fields = new ArrayList<>();
         fields.forEach(s -> {
@@ -74,7 +77,7 @@ public abstract class InventoryGui implements GuiSection {
     }
 
     @Override
-    public @Nullable List<GuiPosition> getParentFields() {
+    public @NotNull List<GuiPosition> getParentFields() {
         return fields;
     }
 
@@ -114,25 +117,28 @@ public abstract class InventoryGui implements GuiSection {
         return true;
     }
 
-    public void addComponent(@NonNull Component component) {
+    public boolean addComponent(@NonNull Component component) {
         Validate.notNull(component);
 
         InventoryGuiComponentAddEvent event = new InventoryGuiComponentAddEvent(this, component);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) components.add(component);
+        return !event.isCancelled();
     }
 
-    public void removeComponent(@NonNull Component component) {
+    public boolean removeComponent(@NonNull Component component) {
         Validate.notNull(component);
 
         InventoryGuiComponentRemoveEvent event = new InventoryGuiComponentRemoveEvent(this, component);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) components.remove(component);
+        return !event.isCancelled();
     }
 
     public void addSection(@NonNull GuiSection section) throws InventoryGuiSectionOutOfFields {
         Validate.notNull(section);
-        if (!isDistinct(section)) throw new InventoryGuiSectionOutOfFields();
+
+        if (getCommonPositions(section).isEmpty()) throw new InventoryGuiSectionOutOfFields();
 
         guiSections.add(section);
     }
@@ -231,8 +237,8 @@ public abstract class InventoryGui implements GuiSection {
 
     protected abstract GuiInstance<?> createInstance(UUID uuid);
 
-    public GuiInstance<?> getInstance(UUID uuid) {
-        return guiInstanceMap.get(uuid);
+    public Optional<GuiInstance<?>> getInstance(UUID uuid) {
+        return Optional.ofNullable(guiInstanceMap.get(uuid));
     }
 
     public void removeInstance(UUID uuid) {
@@ -267,11 +273,25 @@ public abstract class InventoryGui implements GuiSection {
 
         public void updateInventory() {
             Optional<ItemPanelComponent> opt = gui.getFromComponent(ItemPanelComponent.class);
-            opt.ifPresent(itemPanelComponent -> {
+            opt.ifPresent(panelComponent -> {
                 for (GuiPosition field : gui.getFields()) {
-                    inventory.setItem(field.getIndex(), itemPanelComponent.getItem(field).getItem(gui, Bukkit.getPlayer(owner)));
+                    panelComponent.getItem(field).ifPresent(item -> {
+                        inventory.setItem(field.project(gui).getIndex(), item.getItem(gui, Objects.requireNonNull(Bukkit.getPlayer(owner))));
+                    });
                 }
             });
+            recUpdate(gui);
+        }
+
+        private void recUpdate(GuiSection section) {
+            for (GuiSection subSection : section.getSubSections()) {
+                subSection.getFromComponent(ItemPanelComponent.class).ifPresent(panelComponent -> {
+                    for (Map.Entry<GuiPosition, ItemComponent> entry : panelComponent.getItemComponentMap().entrySet()) {
+                        getInventory().setItem(entry.getKey().project(getGui()).getIndex(), entry.getValue().getItem(getGui(), Objects.requireNonNull(Bukkit.getPlayer(getOwner()))));
+                    }
+                });
+                recUpdate(subSection);
+            }
         }
 
         public Inventory getInventory() {

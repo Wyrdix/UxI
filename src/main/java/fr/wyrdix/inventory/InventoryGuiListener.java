@@ -40,9 +40,12 @@ public class InventoryGuiListener implements Listener {
                 react.onClick(event.getGui(), event.getPosition(), event.getPlayer());
             }
 
-            if (component instanceof ItemComponent itemComponent && itemComponent.getPosition().equals(event.getPosition())) {
-                itemComponent.onClick(event, event.getSection(), event.getPlayer());
+            if (component instanceof ItemComponent itemComponent) {
+                if (itemComponent.getPosition().equals(event.getPosition())) {
+                    itemComponent.onClick(event, event.getSection(), event.getPlayer());
+                }
             }
+
         }
 
     }

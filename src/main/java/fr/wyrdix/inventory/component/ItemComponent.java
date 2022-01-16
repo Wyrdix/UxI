@@ -18,6 +18,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class ItemComponent implements PositionalComponent {
 
@@ -63,7 +64,9 @@ public class ItemComponent implements PositionalComponent {
 
     public ItemStack getItem(InventoryGui gui, Player player) {
         stack.setItemMeta(meta);
-        return createRunnable.onCreate(gui, player, stack, gui.getInstance(player.getUniqueId()));
+        Optional<InventoryGui.GuiInstance<?>> opt = gui.getInstance(player.getUniqueId());
+        if (opt.isEmpty()) return null;
+        return createRunnable.onCreate(gui, player, stack, opt.get());
     }
 
     @SuppressWarnings("unused")

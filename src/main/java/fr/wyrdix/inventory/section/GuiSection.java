@@ -4,6 +4,7 @@ import fr.wyrdix.inventory.GuiPosition;
 import fr.wyrdix.inventory.InventoryGui;
 import fr.wyrdix.inventory.component.Component;
 import fr.wyrdix.inventory.component.ItemComponent;
+import fr.wyrdix.inventory.exceptions.InventoryGuiSectionOutOfFields;
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -20,6 +21,8 @@ public interface GuiSection {
     @NonNull List<GuiPosition> getFields();
 
     @NonNull Set<GuiSection> getSubSections();
+
+    void addSection(GuiSection section) throws InventoryGuiSectionOutOfFields;
 
     @NonNull Set<Component> getComponents();
 
@@ -82,7 +85,9 @@ public interface GuiSection {
 
     void setItem(@NonNull ItemComponent component);
 
-    void addComponent(@NonNull Component component);
+    boolean addComponent(@NonNull Component component);
 
-    void removeComponent(@NonNull Component component);
+    boolean removeComponent(@NonNull Component component);
+
+    Optional<InventoryGui.GuiInstance<?>> getInstance(UUID uuid);
 }

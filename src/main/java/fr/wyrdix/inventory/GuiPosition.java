@@ -29,7 +29,7 @@ public class GuiPosition {
     public GuiPosition(@NonNull GuiSection section, int index) throws InventoryGuiSectionOutOfFields {
         Validate.notNull(section);
         @NonNull List<GuiPosition> fields = section.getFields();
-        if (fields.size() <= index) throw new InventoryGuiSectionOutOfFields();
+        if (fields.size() <= index) throw new InventoryGuiSectionOutOfFields(fields.size(), index);
 
         this.section = section;
         this.index = index;
@@ -94,8 +94,7 @@ public class GuiPosition {
     @Override
     public String toString() {
         return "GuiPosition{" +
-                "section=" + section +
-                ", x=" + x +
+                "x=" + x +
                 ", y=" + y +
                 ", index=" + index +
                 '}';

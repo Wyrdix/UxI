@@ -6,6 +6,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class ItemPanelComponent implements Component {
     private final GuiSection section;
@@ -19,18 +20,15 @@ public class ItemPanelComponent implements Component {
         return section;
     }
 
-    @Override
-    public void onAddition(@NonNull GuiSection section) {
-        for (GuiPosition field : section.getFields()) {
-            itemComponentMap.put(field, new ItemComponent(field, null));
-        }
-    }
-
-    public @NonNull ItemComponent getItem(GuiPosition position) {
-        return itemComponentMap.get(position);
+    public @NonNull Optional<ItemComponent> getItem(GuiPosition position) {
+        return Optional.ofNullable(itemComponentMap.get(position));
     }
 
     public void setItem(ItemComponent itemComponent) {
         itemComponentMap.put(itemComponent.getPosition(), itemComponent);
+    }
+
+    public Map<GuiPosition, ItemComponent> getItemComponentMap() {
+        return itemComponentMap;
     }
 }

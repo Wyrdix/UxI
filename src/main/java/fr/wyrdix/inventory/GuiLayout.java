@@ -6,12 +6,11 @@ import org.apache.commons.lang.Validate;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 
 public final class GuiLayout {
-
-    private static final Function<GuiPosition, ItemComponent> AIR_CREATOR = (position -> new ItemComponent(position, null));
 
     private GuiLayout() {
     }
@@ -31,7 +30,7 @@ public final class GuiLayout {
 
             char c = line.charAt(field.getX());
 
-            section.setItem(itemComponentMap.getOrDefault(c, AIR_CREATOR).apply(field));
+            Optional.ofNullable(itemComponentMap.get(c)).ifPresent(s -> section.setItem(s.apply(field)));
         }
     }
 
