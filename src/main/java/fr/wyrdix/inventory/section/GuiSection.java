@@ -90,4 +90,9 @@ public interface GuiSection {
     boolean removeComponent(@NonNull Component component);
 
     Optional<InventoryGui.GuiInstance<?>> getInstance(UUID uuid);
+
+    default Optional<InventoryGui.GuiInstance<?>> getInstance(Player player) {
+        if (player == null) return Optional.empty();
+        return getInstance(player.getUniqueId());
+    }
 }
