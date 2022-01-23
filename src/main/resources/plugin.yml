@@ -7,5 +7,5 @@ api-version: 1.16
 default-permission: op
 prefix: "UxI"
 database: false
-version: "$version"
+version: "${project.version}"
 main: fr.wyrdix.UxiPlugin

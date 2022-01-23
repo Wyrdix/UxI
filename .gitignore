@@ -1,4 +1,3 @@
-﻿/.gradle/
-/.idea/
-/build/
+﻿/.idea/
 /src/Uxi.iml
+/target/
