@@ -29,21 +29,16 @@ import java.util.*;
 
 public abstract class InventoryGui extends SimpleGuiSection {
 
-    private static final NamespacedKey INVENTORY_GUI_NAMESPACEKEY = new NamespacedKey(UxiPlugin.getInstance(), "gui_inventory_id");
     static final Map<Integer, InventoryGui> INVENTORY_GUIS = new HashMap<>();
+    private static final NamespacedKey INVENTORY_GUI_NAMESPACEKEY = new NamespacedKey(UxiPlugin.getInstance(), "gui_inventory_id");
     private static int ID_COUNTER = 0;
-
-
     private final Set<Player> viewers = new HashSet<>();
     private final List<GuiPosition> fields;
     private final Set<Component> components = new HashSet<>();
     private final Set<GuiSection> guiSections = new HashSet<>();
-
     private final Map<UUID, GuiInstance<?>> guiInstanceMap = new HashMap<>();
-
     private final int size;
     private final int id = ++ID_COUNTER;
-
     private final GuiOptions options;
 
     public InventoryGui(@NonNull List<GuiPosition.UnsafeGuiPosition> fields) {
@@ -63,22 +58,13 @@ public abstract class InventoryGui extends SimpleGuiSection {
         size = this.fields.size();
         this.options = options;
 
+        if (options.getGuiRefreshRate() > 0) InventoryGuiUpdater.INVENTORY_GUI.put(id, System.currentTimeMillis());
         INVENTORY_GUIS.put(id, this);
     }
 
     protected static GuiPosition createUnsafePosition(@NonNull InventoryGui gui, int index, int x, int y) {
         Validate.notNull(gui);
         return new GuiPosition(gui, index, x, y);
-    }
-
-    @Override
-    public @Nullable GuiSection getParent() {
-        return null;
-    }
-
-    @Override
-    public @NotNull List<GuiPosition> getParentFields() {
-        return fields;
     }
 
     public static Optional<InventoryGui> getOpenedInventory(@NonNull Player player) {
@@ -89,6 +75,20 @@ public abstract class InventoryGui extends SimpleGuiSection {
         if (id == null) return Optional.empty();
         InventoryGui gui = InventoryGui.INVENTORY_GUIS.get(id);
         return Optional.ofNullable(gui);
+    }
+
+    public Set<Player> getViewers() {
+        return ImmutableSet.copyOf(viewers);
+    }
+
+    @Override
+    public @Nullable GuiSection getParent() {
+        return null;
+    }
+
+    @Override
+    public @NotNull List<GuiPosition> getParentFields() {
+        return fields;
     }
 
     public boolean close(@NonNull Player player) {

@@ -4,6 +4,7 @@ public class GuiOptions {
 
     private int playerLimit = -1;
     private boolean guiCleanup = true;
+    private int guiRefreshRate = -1;
 
 
     public GuiOptions() {
@@ -24,5 +25,13 @@ public class GuiOptions {
 
     public void setGuiCleanup(boolean guiCleanup) {
         this.guiCleanup = guiCleanup;
+    }
+
+    public int getGuiRefreshRate() {
+        return guiRefreshRate;
+    }
+
+    public void setGuiRefreshRate(int guiRefreshRate) {
+        this.guiRefreshRate = guiRefreshRate <= 0 ? -1 : guiRefreshRate;
     }
 }
