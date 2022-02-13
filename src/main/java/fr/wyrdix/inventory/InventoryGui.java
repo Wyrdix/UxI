@@ -249,7 +249,7 @@ public abstract class InventoryGui extends SimpleGuiSection {
 
         private final T gui;
         private final UUID owner;
-        private final Inventory inventory;
+        protected Inventory inventory;
 
         private final Map<GuiSection, Map<String, Object>> sectionPropertyMap = new HashMap<>();
 
@@ -274,6 +274,7 @@ public abstract class InventoryGui extends SimpleGuiSection {
         protected abstract Inventory createInventory();
 
         public void updateInventory() {
+            inventory = createInventory();
             Optional<ItemPanelComponent> opt = gui.getFromComponent(ItemPanelComponent.class);
             opt.ifPresent(panelComponent -> {
                 for (GuiPosition field : gui.getFields()) {
