@@ -96,6 +96,10 @@ public abstract class InventoryGui extends SimpleGuiSection {
     }
 
     public boolean open(@NonNull Player player) throws UnknownPlayerException, InventoryGuiPlayerLimitException {
+        return open(player, Collections.emptyMap());
+    }
+
+    public boolean open(@NonNull Player player, Map<String, Object> properties) throws UnknownPlayerException, InventoryGuiPlayerLimitException {
         Validate.notNull(player);
         if (!player.isOnline()) throw new UnknownPlayerException();
         if (getOptions().getPlayerLimit() != -1 && viewers.size() >= getOptions().getPlayerLimit())
@@ -109,6 +113,8 @@ public abstract class InventoryGui extends SimpleGuiSection {
         player.getPersistentDataContainer().set(INVENTORY_GUI_NAMESPACEKEY, PersistentDataType.INTEGER, id);
         GuiInstance<?> instance = guiInstanceMap.computeIfAbsent(player.getUniqueId(), this::createInstance);
 
+        instance.sectionPropertyMap.get(this).putAll(properties);
+
         instance.updateInventory();
         player.openInventory(instance.inventory);
         instance.setOpen(true);
@@ -116,6 +122,7 @@ public abstract class InventoryGui extends SimpleGuiSection {
 
         return true;
     }
+
 
     public boolean addComponent(@NonNull Component component) {
         Validate.notNull(component);
