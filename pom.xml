@@ -6,7 +6,7 @@
 
     <groupId>com.github.wyrdix</groupId>
     <artifactId>UxI</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1.6-SNAPSHOT</version>
 
     <distributionManagement>
         <repository>
