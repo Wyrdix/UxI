@@ -13,11 +13,8 @@ import java.util.UUID;
 
 public class ChestInventoryGui extends InventoryGui {
 
-    private final String title;
-
     public ChestInventoryGui(@NonNull String title, int size) {
-        super(create(size));
-        this.title = title;
+        super(title, create(size));
     }
 
     private static @NonNull List<GuiPosition.UnsafeGuiPosition> create(int size) {
@@ -32,10 +29,6 @@ public class ChestInventoryGui extends InventoryGui {
         return set;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
     @Override
     protected InventoryGui.GuiInstance<?> createInstance(UUID uuid) {
         return new GuiInstance(this, uuid);
@@ -48,9 +41,9 @@ public class ChestInventoryGui extends InventoryGui {
         }
 
         @Override
-        protected Inventory createInventory() {
+        protected Inventory createInventory(String title) {
             //noinspection deprecation
-            return Bukkit.createInventory(null, getGui().getSize(), getGui().title);
+            return Bukkit.createInventory(null, getGui().getSize(), title);
         }
     }
 }

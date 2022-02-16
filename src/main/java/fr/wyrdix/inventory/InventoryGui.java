@@ -26,6 +26,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.Function;
 
 public abstract class InventoryGui extends SimpleGuiSection {
 
@@ -40,13 +41,19 @@ public abstract class InventoryGui extends SimpleGuiSection {
     private final int size;
     private final int id = ++ID_COUNTER;
     private final GuiOptions options;
+    private final String title;
 
     public InventoryGui(@NonNull List<GuiPosition.UnsafeGuiPosition> fields) {
-        this(fields, new GuiOptions());
+        this(null, fields);
     }
 
     public InventoryGui(List<GuiPosition.UnsafeGuiPosition> fields, GuiOptions options) {
+        this(null, fields, options);
+    }
+
+    public InventoryGui(String title, List<GuiPosition.UnsafeGuiPosition> fields, GuiOptions options) {
         super(null);
+        this.title = title;
         Validate.notNull(fields);
         this.fields = new ArrayList<>();
         fields.forEach(s -> {
@@ -60,6 +67,10 @@ public abstract class InventoryGui extends SimpleGuiSection {
 
         if (options.getGuiRefreshRate() > 0) InventoryGuiUpdater.INVENTORY_GUI.put(id, System.currentTimeMillis());
         INVENTORY_GUIS.put(id, this);
+    }
+
+    public InventoryGui(String title, List<GuiPosition.UnsafeGuiPosition> fields) {
+        this(title, fields, new GuiOptions());
     }
 
     protected static GuiPosition createUnsafePosition(@NonNull InventoryGui gui, int index, int x, int y) {
@@ -113,7 +124,7 @@ public abstract class InventoryGui extends SimpleGuiSection {
         player.getPersistentDataContainer().set(INVENTORY_GUI_NAMESPACEKEY, PersistentDataType.INTEGER, id);
         GuiInstance<?> instance = guiInstanceMap.computeIfAbsent(player.getUniqueId(), this::createInstance);
 
-        instance.sectionPropertyMap.get(this).putAll(properties);
+        instance.sectionPropertyMap.computeIfAbsent(this, (a) -> new HashMap<>()).putAll(properties);
 
         instance.updateInventory();
         player.openInventory(instance.inventory);
@@ -252,22 +263,27 @@ public abstract class InventoryGui extends SimpleGuiSection {
         guiInstanceMap.remove(uuid);
     }
 
+    public String getTitle() {
+        return title;
+    }
+
     public static abstract class GuiInstance<T extends InventoryGui> {
 
         private final T gui;
         private final UUID owner;
-        protected Inventory inventory;
-
         private final Map<GuiSection, Map<String, Object>> sectionPropertyMap = new HashMap<>();
-
+        protected Inventory inventory;
         private boolean isOpen = false;
+
+        private String oldTitle;
 
         public GuiInstance(@NonNull T gui, @NonNull UUID owner) {
 
             this.gui = gui;
             this.owner = owner;
 
-            inventory = createInventory();
+            oldTitle = getTitle();
+            inventory = createInventory(oldTitle);
         }
 
         public T getGui() {
@@ -278,10 +294,23 @@ public abstract class InventoryGui extends SimpleGuiSection {
             return owner;
         }
 
-        protected abstract Inventory createInventory();
+        public String getTitle() {
+            return getGui().getFromComponent(TitleSupplierComponent.class)
+                    .map(s -> ((Function<GuiInstance<?>, String>) s))
+                    .orElse(instance -> instance.getGui().getTitle()).apply(this);
+        }
+
+        protected abstract Inventory createInventory(String title);
+
 
         public void updateInventory() {
-            inventory = createInventory();
+            if (oldTitle != null) {
+                String title = getTitle();
+                if (!oldTitle.equals(title)) {
+                    oldTitle = title;
+                    inventory = createInventory(oldTitle);
+                }
+            }
             Optional<ItemPanelComponent> opt = gui.getFromComponent(ItemPanelComponent.class);
             opt.ifPresent(panelComponent -> {
                 for (GuiPosition field : gui.getFields()) {
