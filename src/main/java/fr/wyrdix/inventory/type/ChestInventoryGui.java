@@ -34,7 +34,7 @@ public class ChestInventoryGui extends InventoryGui {
         return new GuiInstance(this, uuid);
     }
 
-    private final static class GuiInstance extends InventoryGui.GuiInstance<ChestInventoryGui> {
+    public static class GuiInstance extends InventoryGui.GuiInstance<ChestInventoryGui> {
 
         public GuiInstance(@NonNull ChestInventoryGui gui, @NonNull UUID owner) {
             super(gui, owner);
