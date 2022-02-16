@@ -67,7 +67,7 @@ public class SimpleGuiSection implements GuiSection {
 
         getInstance(player.getUniqueId()).ifPresent(instance -> {
             if (addComponent(new PersonalItemComponent(position, item, player))) {
-                instance.getInventory().setItem(position.getIndex(), item);
+                instance.setItem(position, item);
             }
         });
     }

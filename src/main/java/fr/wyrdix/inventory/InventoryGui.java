@@ -244,7 +244,7 @@ public abstract class InventoryGui extends SimpleGuiSection {
         Validate.notNull(instance);
 
         addComponent(new PersonalItemComponent(position, item, player));
-        instance.getInventory().setItem(position.getIndex(), item);
+        instance.setItem(position, item);
     }
 
     @Override
@@ -317,7 +317,7 @@ public abstract class InventoryGui extends SimpleGuiSection {
                     panelComponent.getItem(field).ifPresent(item -> {
                         ItemStack itemStack = item.getItem(gui, Objects.requireNonNull(Bukkit.getPlayer(owner)));
                         if (itemStack == null) return;
-                        inventory.setItem(field.project(gui).getIndex(), itemStack);
+                        setItem(field.project(gui), itemStack);
                     });
                 }
             });
@@ -330,7 +330,7 @@ public abstract class InventoryGui extends SimpleGuiSection {
                     for (Map.Entry<GuiPosition, ItemComponent> entry : panelComponent.getItemComponentMap().entrySet()) {
                         ItemStack item = entry.getValue().getItem(getGui(), Objects.requireNonNull(Bukkit.getPlayer(getOwner())));
                         if (item == null) continue;
-                        getInventory().setItem(entry.getKey().project(getGui()).getIndex(), item);
+                        setItem(entry.getKey().project(getGui()), item);
                     }
                 });
                 recUpdate(subSection);
@@ -357,6 +357,10 @@ public abstract class InventoryGui extends SimpleGuiSection {
 
         protected void setOpen(boolean open) {
             isOpen = open;
+        }
+
+        public void setItem(GuiPosition position, ItemStack stack) {
+            getInventory().setItem(position.getIndex(), stack);
         }
     }
 }
