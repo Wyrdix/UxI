@@ -259,6 +259,10 @@ public abstract class InventoryGui extends SimpleGuiSection {
         return Optional.ofNullable(guiInstanceMap.get(uuid));
     }
 
+    public GuiInstance<?> getOrCreate(UUID uuid) {
+        return guiInstanceMap.computeIfAbsent(uuid, this::createInstance);
+    }
+
     public void removeInstance(UUID uuid) {
         guiInstanceMap.remove(uuid);
     }
@@ -322,6 +326,15 @@ public abstract class InventoryGui extends SimpleGuiSection {
                 }
             });
             recUpdate(gui);
+        }
+
+        public void update(GuiPosition position) {
+            Optional<ItemPanelComponent> opt = gui.getFromComponent(ItemPanelComponent.class);
+            opt.flatMap(panelComponent -> panelComponent.getItem(position)).ifPresent(item -> {
+                ItemStack itemStack = item.getItem(gui, Objects.requireNonNull(Bukkit.getPlayer(owner)));
+                if (itemStack == null) return;
+                setItem(position.project(gui), itemStack);
+            });
         }
 
         private void recUpdate(GuiSection section) {
