@@ -8,4 +8,4 @@ default-permission: op
 prefix: "UxI"
 database: false
 version: "${project.version}"
-main: fr.wyrdix.UxiPlugin
+main: com.github.wyrdix.UxiPlugin
