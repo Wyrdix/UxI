@@ -1,10 +1,7 @@
 package com.github.wyrdix.inventory;
 
 import com.github.wyrdix.inventory.component.*;
-import com.github.wyrdix.inventory.event.InventoryGuiClickEvent;
-import com.github.wyrdix.inventory.event.InventoryGuiCloseEvent;
-import com.github.wyrdix.inventory.event.InventoryGuiComponentAddEvent;
-import com.github.wyrdix.inventory.event.InventoryGuiComponentRemoveEvent;
+import com.github.wyrdix.inventory.event.*;
 import com.github.wyrdix.inventory.section.FreeSection;
 import com.github.wyrdix.inventory.section.GuiSection;
 import com.google.common.collect.ImmutableList;
@@ -73,7 +70,15 @@ public class InventoryGuiListener implements Listener {
                     gui.removeComponent(component);
                 }
             }
+
+            onGuiClose(event, event.getGui());
         }
+    }
+
+    private void onGuiClose(InventoryGuiCloseEvent event, GuiSection section) {
+        if (section instanceof FreeSection) ((FreeSection) section).onClose(event);
+
+        section.getSubSections().forEach(s -> onGuiClose(event, s));
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -104,5 +109,15 @@ public class InventoryGuiListener implements Listener {
 
             panelComponent.setItem(new ItemComponent(itemComponent.getPosition(), null));
         }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onOpen(InventoryGuiOpenEvent event) {
+        if (event.isCancelled()) return;
+        InventoryGui gui = event.getGui();
+        if (gui.getOptions().getGuiRefreshRate() > 0) {
+            InventoryGuiUpdater.INVENTORY_GUI.put(gui.getId(), -1L);
+        }
+
     }
 }

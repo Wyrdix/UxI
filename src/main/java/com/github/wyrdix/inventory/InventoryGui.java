@@ -42,7 +42,6 @@ public abstract class InventoryGui extends SimpleGuiSection {
     private final int id = ++ID_COUNTER;
     private final GuiOptions options;
     private final String title;
-
     public InventoryGui(@NonNull List<GuiPosition.UnsafeGuiPosition> fields) {
         this(null, fields);
     }
@@ -86,6 +85,10 @@ public abstract class InventoryGui extends SimpleGuiSection {
         if (id == null) return Optional.empty();
         InventoryGui gui = InventoryGui.INVENTORY_GUIS.get(id);
         return Optional.ofNullable(gui);
+    }
+
+    public int getId() {
+        return id;
     }
 
     public Set<Player> getViewers() {

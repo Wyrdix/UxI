@@ -74,7 +74,7 @@ public class InventoryGuiClickEvent extends GuiEvent implements Cancellable {
             }
         }
 
-        return cancelled;
+        return (guiSection instanceof FreeSection) || cancelled;
     }
 
     public @NonNull ItemStack getItem() {
