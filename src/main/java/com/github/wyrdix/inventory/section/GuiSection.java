@@ -79,6 +79,10 @@ public interface GuiSection {
         return positionStream.filter(s -> projectedPositions.contains(s.project(root))).toList();
     }
 
+    default @NonNull List<GuiSection> getSectionsContaining(GuiPosition position){
+        return getSubSections().stream().filter(s -> s.getParentFields().contains(position)).toList();
+    }
+
     @Nullable ItemStack getItem(@NonNull GuiPosition position, @NonNull Player player);
 
     void setItem(@NonNull GuiPosition position, @NonNull Player player, @NonNull ItemStack item);

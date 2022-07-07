@@ -2,6 +2,7 @@ package com.github.wyrdix.inventory;
 
 import com.github.wyrdix.inventory.component.*;
 import com.github.wyrdix.inventory.event.*;
+import com.github.wyrdix.inventory.exceptions.InventoryGuiSectionOutOfFields;
 import com.github.wyrdix.inventory.section.FreeSection;
 import com.github.wyrdix.inventory.section.GuiSection;
 import com.google.common.collect.ImmutableList;
@@ -9,8 +10,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+
+import java.util.List;
+import java.util.Objects;
 
 public class InventoryGuiListener implements Listener {
     public InventoryGuiListener() {
@@ -19,18 +25,43 @@ public class InventoryGuiListener implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
+        if (event.getAction().equals(InventoryAction.COLLECT_TO_CURSOR)) event.setCancelled(true);
         if (event.getClickedInventory() == null) return;
-        if (event.getRawSlot() != event.getSlot()) return;
+        if (event.getRawSlot() != event.getSlot()){
+            if(event.isShiftClick()) event.setCancelled(true);
+        }else{
+            Player player = (Player) event.getWhoClicked();
 
+            InventoryGui.getOpenedInventory(player).ifPresent(gui -> {
+                boolean cancelled = InventoryGuiClickEvent.generateEvent(event, gui, gui, player, event.getSlot(), false);
+
+                event.setCancelled(!cancelled);
+            });
+        }
+    }
+
+    @EventHandler
+    public void onDrag(InventoryDragEvent event){
         Player player = (Player) event.getWhoClicked();
 
-        InventoryGui.getOpenedInventory(player).ifPresent(gui -> {
-            boolean cancelled = InventoryGuiClickEvent.generateEvent(event, gui, gui, player, event.getSlot(), false);
+        InventoryGui.getOpenedInventory(player).ifPresent(gui ->{
+            gui.getInstance(player).ifPresent(instance->{
+                List<GuiPosition> collect = event.getRawSlots().stream().sorted().map(slot -> {
+                    try {
+                        return new GuiPosition(gui, slot);
+                    } catch (InventoryGuiSectionOutOfFields e) {
+                        return null;
+                    }
+                }).filter(Objects::nonNull).filter(s->!FreeSection.isFree(gui, s)).toList();
 
-            event.setCancelled(!cancelled);
+                System.out.println("Hello");
+                if(!collect.isEmpty()) {
+                    event.setCancelled(true);
+                }
+            });
         });
-
     }
+
 
     @EventHandler
     public void onClick(InventoryGuiClickEvent event) {
@@ -118,6 +149,5 @@ public class InventoryGuiListener implements Listener {
         if (gui.getOptions().getGuiRefreshRate() > 0) {
             InventoryGuiUpdater.INVENTORY_GUI.put(gui.getId(), -1L);
         }
-
     }
 }

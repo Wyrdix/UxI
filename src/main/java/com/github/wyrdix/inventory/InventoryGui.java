@@ -102,7 +102,7 @@ public abstract class InventoryGui extends SimpleGuiSection {
 
     @Override
     public @NotNull List<GuiPosition> getParentFields() {
-        return fields;
+        return Collections.emptyList();
     }
 
     public boolean close(@NonNull Player player) {
@@ -323,7 +323,6 @@ public abstract class InventoryGui extends SimpleGuiSection {
                 for (GuiPosition field : gui.getFields()) {
                     panelComponent.getItem(field).ifPresent(item -> {
                         ItemStack itemStack = item.getItem(gui, Objects.requireNonNull(Bukkit.getPlayer(owner)));
-                        if (itemStack == null) return;
                         setItem(field.project(gui), itemStack);
                     });
                 }

@@ -87,7 +87,7 @@ public class GuiPosition {
         if (gui == getSection()) return this;
 
         List<GuiPosition> parentFields = getSection().getParentFields();
-        if (parentFields == null) throw new IllegalArgumentException("Trouble with projecting gui position");
+        if (parentFields == null || parentFields.size() < index) throw new IllegalArgumentException("Trouble with projecting gui position");
         return parentFields.get(index).project(gui);
     }
 

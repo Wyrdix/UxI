@@ -34,6 +34,17 @@ public abstract class PaginatedSection extends SimpleGuiSection {
         }
     }
 
+    @Override
+    public String toString() {
+        return "PaginatedSection{" +
+                "fields=" + fields +
+                ", parentFields=" + parentFields +
+                ", sections=" + getSubSections() +
+                ", components=" + getComponents() +
+                ", parent=" + getParent() +
+                '}';
+    }
+
     protected ItemStack getItem(InventoryGui gui, Player player, GuiPosition position, InventoryGui.GuiInstance<?> instance, int index) {
 
         if (index >= getSize(instance)) return new ItemStack(Material.AIR);
