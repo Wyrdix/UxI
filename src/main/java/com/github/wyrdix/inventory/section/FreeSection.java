@@ -10,7 +10,7 @@ public interface FreeSection extends GuiSection {
     static boolean isFree(GuiSection gui, GuiPosition position) {
         if(gui instanceof FreeSection) return true;
         for (GuiSection section : gui.getSectionsContaining(position)) {
-            if(isFree(section, position.project(section))) return true;
+            if(isFree(section, section.getFields().get(section.getParentFields().indexOf(position)))) return true;
         }
 
         return false;

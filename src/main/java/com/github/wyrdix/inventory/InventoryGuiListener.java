@@ -25,19 +25,24 @@ public class InventoryGuiListener implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
-        if (event.getAction().equals(InventoryAction.COLLECT_TO_CURSOR)) event.setCancelled(true);
         if (event.getClickedInventory() == null) return;
-        if (event.getRawSlot() != event.getSlot()){
-            if(event.isShiftClick()) event.setCancelled(true);
-        }else{
-            Player player = (Player) event.getWhoClicked();
 
-            InventoryGui.getOpenedInventory(player).ifPresent(gui -> {
+        Player player = (Player) event.getWhoClicked();
+
+        InventoryGui.getOpenedInventory(player).ifPresent(gui -> {
+            if (event.getAction().equals(InventoryAction.COLLECT_TO_CURSOR)){
+                event.setCancelled(true);
+                event.getWhoClicked().getOpenInventory().setCursor(event.getCursor());
+                return;
+            }else if (event.getRawSlot() != event.getSlot()) {
+                if (event.isShiftClick()) event.setCancelled(true);
+            }else{
                 boolean cancelled = InventoryGuiClickEvent.generateEvent(event, gui, gui, player, event.getSlot(), false);
 
                 event.setCancelled(!cancelled);
-            });
-        }
+            }
+
+        });
     }
 
     @EventHandler
@@ -54,9 +59,9 @@ public class InventoryGuiListener implements Listener {
                     }
                 }).filter(Objects::nonNull).filter(s->!FreeSection.isFree(gui, s)).toList();
 
-                System.out.println("Hello");
                 if(!collect.isEmpty()) {
                     event.setCancelled(true);
+                    player.setItemOnCursor(event.getOldCursor());
                 }
             });
         });
