@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -25,6 +26,7 @@ public class InventoryGuiListener implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
+        if (event.getAction().equals(InventoryAction.COLLECT_TO_CURSOR)) event.setCancelled(true);
         if (event.getClickedInventory() == null) return;
 
         Player player = (Player) event.getWhoClicked();
@@ -154,5 +156,13 @@ public class InventoryGuiListener implements Listener {
         if (gui.getOptions().getGuiRefreshRate() > 0) {
             InventoryGuiUpdater.INVENTORY_GUI.put(gui.getId(), -1L);
         }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onDeath(PlayerDeathEvent event) {
+        if (event.isCancelled()) return;
+
+        Player player = event.getEntity();
+        InventoryGui.getOpenedInventory(player).ifPresent(gui -> gui.close(player, true));
     }
 }
