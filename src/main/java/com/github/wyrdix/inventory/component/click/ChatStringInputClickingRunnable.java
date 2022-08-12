@@ -22,7 +22,7 @@ public abstract class ChatStringInputClickingRunnable implements ItemComponent.C
     }
 
     @Override
-    public void onClick(@NonNull InventoryGuiClickEvent event, @NonNull GuiSection section, @NonNull Player player, @NonNull GuiPosition position) {
+    public void onClick(@NonNull InventoryGuiClickEvent event, @NonNull GuiSection section, InventoryGui.@NonNull GuiInstance<?> instance, @NonNull Player player, @NonNull GuiPosition position) {
         currentlyTyping.put(player.getUniqueId(), event.getGui());
         infoMessage(player);
         ChatStringInputListener.getInstance().runnableMap.put(player.getUniqueId(), this);

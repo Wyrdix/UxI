@@ -24,20 +24,22 @@ public class InventoryGuiClickEvent extends GuiEvent implements Cancellable {
     private final @NonNull ItemStack item;
     private final InventoryClickEvent nativeEvent;
     private final GuiPosition position;
+    private final Player player;
 
     private boolean cancelled = false;
 
-    public InventoryGuiClickEvent(@NonNull InventoryClickEvent event, @NonNull InventoryGui gui, @NonNull Player player, @NonNull GuiSection section, @NonNull GuiPosition position) {
-        super(gui, player);
+    public InventoryGuiClickEvent(@NonNull InventoryClickEvent event, @NonNull InventoryGui gui, InventoryGui.@NonNull GuiInstance<?> instance, @NonNull GuiSection section, @NonNull GuiPosition position, Player player) {
+        super(gui, instance);
+        this.player = player;
         Validate.notNull(event);
         Validate.notNull(gui);
-        Validate.notNull(player);
         Validate.notNull(section);
         Validate.notNull(position);
         this.nativeEvent = event;
         this.position = position;
         this.section = section;
-        ItemStack item = getSection().getItem(position, player);
+
+        ItemStack item = getSection().getItem(position, instance);
         if (item == null) item = new ItemStack(Material.AIR);
         this.item = item;
     }
@@ -46,14 +48,14 @@ public class InventoryGuiClickEvent extends GuiEvent implements Cancellable {
         return HANDLER_LIST;
     }
 
-    public static boolean generateEvent(@NonNull InventoryClickEvent nativeEvent, @NonNull InventoryGui gui, @NonNull GuiSection guiSection, @NonNull Player player, int slot, boolean cancelled) {
+    public static boolean generateEvent(@NonNull InventoryClickEvent nativeEvent, @NonNull InventoryGui gui, @NonNull GuiSection guiSection, InventoryGui.@NonNull GuiInstance<?> instance, Player player, int slot, boolean cancelled) {
         Validate.notNull(guiSection);
-        Validate.notNull(player);
+        Validate.notNull(instance);
         Validate.isTrue(slot >= 0 && slot < gui.getFields().size(), slot + " isn't between 0 and " + (gui.getFields().size() - 1));
 
         SlotSection slotSection = new SlotSection(guiSection, slot);
 
-        InventoryGuiClickEvent event = new InventoryGuiClickEvent(nativeEvent, gui, player, guiSection, guiSection.getFields().get(slot));
+        InventoryGuiClickEvent event = new InventoryGuiClickEvent(nativeEvent, gui, instance, guiSection, guiSection.getFields().get(slot), player);
 
         event.setCancelled(cancelled);
 
@@ -70,7 +72,7 @@ public class InventoryGuiClickEvent extends GuiEvent implements Cancellable {
 
                 int newSlot = section.getFields().indexOf(common.get(0));
 
-                cancelled = generateEvent(nativeEvent, gui, section, player, newSlot, cancelled);
+                cancelled = generateEvent(nativeEvent, gui, section, instance, player, newSlot, cancelled);
             }
         }
 
@@ -106,5 +108,9 @@ public class InventoryGuiClickEvent extends GuiEvent implements Cancellable {
 
     public InventoryClickEvent getNativeEvent() {
         return nativeEvent;
+    }
+
+    public Player getPlayer() {
+        return player;
     }
 }

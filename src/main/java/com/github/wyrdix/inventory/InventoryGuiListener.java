@@ -35,11 +35,10 @@ public class InventoryGuiListener implements Listener {
             if (event.getAction().equals(InventoryAction.COLLECT_TO_CURSOR)){
                 event.setCancelled(true);
                 event.getWhoClicked().getOpenInventory().setCursor(event.getCursor());
-                return;
             }else if (event.getRawSlot() != event.getSlot()) {
                 if (event.isShiftClick()) event.setCancelled(true);
             }else{
-                boolean cancelled = InventoryGuiClickEvent.generateEvent(event, gui, gui, player, event.getSlot(), false);
+                boolean cancelled = InventoryGuiClickEvent.generateEvent(event, gui, gui, gui.getInstance(player).orElseThrow(IllegalArgumentException::new), player, event.getSlot(), false);
 
                 event.setCancelled(!cancelled);
             }
@@ -74,12 +73,12 @@ public class InventoryGuiListener implements Listener {
     public void onClick(InventoryGuiClickEvent event) {
         for (Component component : event.getSection().getComponents()) {
             if (component instanceof ClickReactionComponent react) {
-                react.onClick(event.getGui(), event.getPosition(), event.getPlayer());
+                react.onClick(event.getGui(), event.getPosition(), event.getInstance(), event.getPlayer());
             }
 
             if (component instanceof ItemComponent itemComponent) {
                 if (itemComponent.getPosition().equals(event.getPosition())) {
-                    itemComponent.onClick(event, event.getSection(), event.getPlayer());
+                    itemComponent.onClick(event, event.getSection(), event.getInstance(), event.getPlayer());
                 }
             }
 

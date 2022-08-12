@@ -56,8 +56,8 @@ public class SimpleGuiSection implements GuiSection {
     }
 
     @Override
-    public @Nullable ItemStack getItem(@NonNull GuiPosition position, @NonNull Player player) {
-        return getRoot().getItem(position.project(getRoot()), player);
+    public @Nullable ItemStack getItem(@NonNull GuiPosition position, InventoryGui.@NonNull GuiInstance<?> instance) {
+        return getRoot().getItem(position.project(getRoot()), instance);
     }
 
     @Override

@@ -10,11 +10,14 @@ public class InventoryGuiCloseEvent extends GuiEvent implements Cancellable {
 
     private static final HandlerList HANDLER_LIST = new HandlerList();
 
+    private final Player player;
+
     private boolean cancelled = false;
     private boolean instanceRemoved;
 
-    public InventoryGuiCloseEvent(@NonNull InventoryGui gui, @NonNull Player player, boolean instanceRemoved) {
-        super(gui, player);
+    public InventoryGuiCloseEvent(@NonNull InventoryGui gui, InventoryGui.@NonNull  GuiInstance<?> instance, @NonNull Player player, boolean instanceRemoved) {
+        super(gui, instance);
+        this.player = player;
         this.instanceRemoved = instanceRemoved;
     }
 
@@ -43,5 +46,9 @@ public class InventoryGuiCloseEvent extends GuiEvent implements Cancellable {
 
     public void setInstanceRemoved(boolean instanceRemoved) {
         this.instanceRemoved = instanceRemoved;
+    }
+
+    public Player getPlayer() {
+        return player;
     }
 }

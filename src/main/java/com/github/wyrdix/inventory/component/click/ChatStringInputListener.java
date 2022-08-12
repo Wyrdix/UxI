@@ -54,7 +54,7 @@ public class ChatStringInputListener implements Listener {
 
         if (gui == null) return;
 
-        gui.removeInstance(event.getPlayer().getUniqueId());
+        gui.close(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

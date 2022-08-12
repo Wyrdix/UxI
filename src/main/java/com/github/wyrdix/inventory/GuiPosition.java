@@ -73,8 +73,8 @@ public class GuiPosition {
         return y;
     }
 
-    public @Nullable ItemStack getItem(@NonNull Player player) {
-        return section.getItem(this, player);
+    public @Nullable ItemStack getItem(InventoryGui.@NonNull GuiInstance<?> instance) {
+        return section.getItem(this, instance);
     }
 
     public int getIndex() {

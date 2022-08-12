@@ -8,20 +8,20 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class GuiEvent extends Event {
     private final @NonNull InventoryGui gui;
-    private final @NonNull Player player;
+    private final InventoryGui.@NonNull GuiInstance<?> instance;
 
-    public GuiEvent(@NonNull InventoryGui gui, @NonNull Player player) {
+    public GuiEvent(@NonNull InventoryGui gui, InventoryGui.GuiInstance<?> instance) {
         Validate.notNull(gui);
-        Validate.notNull(player);
+        Validate.notNull(instance);
         this.gui = gui;
-        this.player = player;
+        this.instance = instance;
     }
 
     public @NonNull InventoryGui getGui() {
         return gui;
     }
 
-    public @NonNull Player getPlayer() {
-        return player;
+    public InventoryGui.@NonNull GuiInstance<?> getInstance() {
+        return instance;
     }
 }

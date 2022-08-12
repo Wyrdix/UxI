@@ -28,9 +28,19 @@ public class ItemComponent implements PositionalComponent {
     private final ClickingRunnable clickingRunnable;
     private final CreateRunnable createRunnable;
 
+
     public ItemComponent(@NonNull GuiPosition position, @Nullable ItemStack stack) {
-        this(position, stack, (event, section, player, pos) -> {
-        }, (gui, player, itemStack, instance) -> itemStack);
+        this(position, stack, (event, section, instance, player, pos) -> {
+        }, (gui, instance, itemStack) -> itemStack);
+    }
+    public ItemComponent(@NonNull GuiPosition position, @Nullable ItemStack stack, @NonNull CreateRunnable createRunnable) {
+        this(position, stack, (event, section, instance, player, pos) -> {
+        }, createRunnable);
+    }
+
+
+    public ItemComponent(@NonNull GuiPosition position, @Nullable ItemStack stack, @NonNull ClickingRunnable clickingRunnable) {
+        this(position, stack, clickingRunnable, (gui, instance, itemStack) -> itemStack);
     }
 
     public ItemComponent(@NonNull GuiPosition position, @Nullable ItemStack stack, @NonNull ClickingRunnable clickingRunnable, @NonNull CreateRunnable createRunnable) {
@@ -62,16 +72,15 @@ public class ItemComponent implements PositionalComponent {
         return meta;
     }
 
-    public ItemStack getItem(InventoryGui gui, Player player) {
+    public ItemStack getItem(InventoryGui gui, InventoryGui.GuiInstance<?> instance) {
         stack.setItemMeta(meta);
-        Optional<InventoryGui.GuiInstance<?>> opt = gui.getInstance(player.getUniqueId());
-        if (opt.isEmpty()) return null;
-        return createRunnable.onCreate(gui, player, stack, opt.get());
+        if (instance == null) return null;
+        return createRunnable.onCreate(gui, instance, stack);
     }
 
     @SuppressWarnings("unused")
-    public void onClick(InventoryGuiClickEvent event, GuiSection section, Player player) {
-        clickingRunnable.onClick(event, section, player, position);
+    public void onClick(InventoryGuiClickEvent event, GuiSection section, InventoryGui.GuiInstance<?> instance, Player player) {
+        clickingRunnable.onClick(event, section, instance, player, position);
     }
 
     @Override
@@ -146,10 +155,10 @@ public class ItemComponent implements PositionalComponent {
     }
 
     public interface ClickingRunnable {
-        void onClick(@NonNull InventoryGuiClickEvent event, @NonNull GuiSection section, @NonNull Player player, @NonNull GuiPosition position);
+        void onClick(@NonNull InventoryGuiClickEvent event, @NonNull GuiSection section, InventoryGui.@NonNull GuiInstance<?> instance, @NonNull Player player, @NonNull GuiPosition position);
     }
 
     public interface CreateRunnable {
-        ItemStack onCreate(@NonNull InventoryGui gui, @NonNull Player player, @NonNull ItemStack stack, InventoryGui.@NonNull GuiInstance<?> instance);
+        ItemStack onCreate(@NonNull InventoryGui gui, InventoryGui.@NonNull GuiInstance<?> instance, @NonNull ItemStack stack);
     }
 }

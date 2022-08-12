@@ -83,7 +83,7 @@ public interface GuiSection {
         return getSubSections().stream().filter(s -> s.getParentFields().contains(position)).toList();
     }
 
-    @Nullable ItemStack getItem(@NonNull GuiPosition position, @NonNull Player player);
+    @Nullable ItemStack getItem(@NonNull GuiPosition position, InventoryGui.@NonNull GuiInstance<?> instance);
 
     void setItem(@NonNull GuiPosition position, @NonNull Player player, @NonNull ItemStack item);
 

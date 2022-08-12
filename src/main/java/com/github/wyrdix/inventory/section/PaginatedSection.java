@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class PaginatedSection extends SimpleGuiSection {
@@ -25,12 +26,11 @@ public abstract class PaginatedSection extends SimpleGuiSection {
             int elements = i;
 
             super.addComponent(new ItemComponent(thisPosition, null,
-                    (event, section, player, pos) ->
-                            onClick(event, section, player, pos,
-                                    elements + getInstance(player).map(this::getPage).orElse(0) * getFields().size()),
-                    (gui, player, stack, instance) ->
-                            getItem(gui, player, position, instance,
-                                    elements + getInstance(player).map(this::getPage).orElse(0) * getFields().size())));
+                    (event, section, instance, player, pos) ->
+                            onClick(event, section, instance, player, pos,
+                                    elements + getPage(instance) * getFields().size()),
+                    (gui, instance, stack) ->
+                            getItem(gui, position, instance, elements + getPage(instance)  * getFields().size())));
         }
     }
 
@@ -45,21 +45,18 @@ public abstract class PaginatedSection extends SimpleGuiSection {
                 '}';
     }
 
-    protected ItemStack getItem(InventoryGui gui, Player player, GuiPosition position, InventoryGui.GuiInstance<?> instance, int index) {
+    protected ItemStack getItem(InventoryGui gui, GuiPosition position, InventoryGui.GuiInstance<?> instance, int index) {
 
         if (index >= getSize(instance)) return new ItemStack(Material.AIR);
 
-        return getItem(instance, position, index).getItem(gui, player);
+        return getItem(instance, position, index).getItem(gui, instance);
     }
 
-    protected void onClick(InventoryGuiClickEvent event, GuiSection section, @NotNull Player player, GuiPosition pos, int index) {
-
-        //noinspection OptionalGetWithoutIsPresent
-        InventoryGui.GuiInstance<?> instance = getInstance(player).get();
+    protected void onClick(InventoryGuiClickEvent event, GuiSection section, InventoryGui.GuiInstance<?> instance, Player player, GuiPosition pos, int index) {
 
         if (index >= getSize(instance)) return;
 
-        getItem(instance, pos, index).onClick(event, section, player);
+        getItem(instance, pos, index).onClick(event, section, instance, player);
     }
 
     public abstract int getSize(InventoryGui.GuiInstance<?> instance);
@@ -134,31 +131,36 @@ public abstract class PaginatedSection extends SimpleGuiSection {
             this.paginatedSection = paginatedSection;
         }
 
+        public PreviousPageNavigatorItem(PaginatedSection paginatedSection, @NonNull GuiPosition position, @Nullable ItemStack stack, @NonNull CreateRunnable createRunnable) {
+            super(position, stack, createRunnable);
+            this.paginatedSection = paginatedSection;
+        }
+
+        public PreviousPageNavigatorItem(PaginatedSection paginatedSection, @NonNull GuiPosition position, @Nullable ItemStack stack, @NonNull ClickingRunnable clickingRunnable) {
+            super(position, stack, clickingRunnable);
+            this.paginatedSection = paginatedSection;
+        }
+
         public PreviousPageNavigatorItem(@NonNull PaginatedSection paginatedSection, @NonNull GuiPosition position, @NonNull ClickingRunnable clickingRunnable, @NonNull CreateRunnable createRunnable) {
             super(position, new ItemStack(Material.AIR), clickingRunnable, createRunnable);
             this.paginatedSection = paginatedSection;
         }
 
         @Override
-        public ItemStack getItem(InventoryGui gui, Player player) {
+        public ItemStack getItem(InventoryGui gui, InventoryGui.GuiInstance<?> instance) {
             //noinspection OptionalGetWithoutIsPresent
-            InventoryGui.GuiInstance<?> instance = paginatedSection.getInstance(player).get();
-
             if (paginatedSection.isFirstPage(instance)) {
                 return null;
             }
 
-            return super.getItem(gui, player);
+            return super.getItem(gui, instance);
         }
 
         @Override
-        public void onClick(InventoryGuiClickEvent event, GuiSection section, Player player) {
-            //noinspection OptionalGetWithoutIsPresent
-            InventoryGui.GuiInstance<?> instance = paginatedSection.getInstance(player).get();
-
+        public void onClick(InventoryGuiClickEvent event, GuiSection section, InventoryGui.GuiInstance<?> instance, Player player) {
             if (paginatedSection.isFirstPage(instance)) return;
 
-            super.onClick(event, section, player);
+            super.onClick(event, section, instance, player);
 
             paginatedSection.previousPage(instance);
 
@@ -175,31 +177,35 @@ public abstract class PaginatedSection extends SimpleGuiSection {
             this.paginatedSection = paginatedSection;
         }
 
+        public NextPageNavigatorItem(PaginatedSection paginatedSection, @NonNull GuiPosition position, @Nullable ItemStack stack, @NonNull CreateRunnable createRunnable) {
+            super(position, stack, createRunnable);
+            this.paginatedSection = paginatedSection;
+        }
+
+        public NextPageNavigatorItem(PaginatedSection paginatedSection, @NonNull GuiPosition position, @Nullable ItemStack stack, @NonNull ClickingRunnable clickingRunnable) {
+            super(position, stack, clickingRunnable);
+            this.paginatedSection = paginatedSection;
+        }
+
         public NextPageNavigatorItem(@NonNull PaginatedSection paginatedSection, @NonNull GuiPosition position, @NonNull ClickingRunnable clickingRunnable, @NonNull CreateRunnable createRunnable) {
             super(position, new ItemStack(Material.AIR), clickingRunnable, createRunnable);
             this.paginatedSection = paginatedSection;
         }
 
         @Override
-        public ItemStack getItem(InventoryGui gui, Player player) {
-            //noinspection OptionalGetWithoutIsPresent
-            InventoryGui.GuiInstance<?> instance = paginatedSection.getInstance(player).get();
-
+        public ItemStack getItem(InventoryGui gui, InventoryGui.GuiInstance<?> instance) {
             if (paginatedSection.isLastPage(instance)) {
                 return null;
             }
 
-            return super.getItem(gui, player);
+            return super.getItem(gui, instance);
         }
 
         @Override
-        public void onClick(InventoryGuiClickEvent event, GuiSection section, Player player) {
-            //noinspection OptionalGetWithoutIsPresent
-            InventoryGui.GuiInstance<?> instance = paginatedSection.getInstance(player).get();
-
+        public void onClick(InventoryGuiClickEvent event, GuiSection section, InventoryGui.GuiInstance<?> instance, Player player) {
             if (paginatedSection.isLastPage(instance)) return;
 
-            super.onClick(event, section, player);
+            super.onClick(event, section, instance, player);
 
             paginatedSection.nextPage(instance);
 

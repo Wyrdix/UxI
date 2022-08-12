@@ -8,7 +8,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 
 public class ChestInventoryGui extends InventoryGui {
@@ -30,14 +30,14 @@ public class ChestInventoryGui extends InventoryGui {
     }
 
     @Override
-    protected InventoryGui.GuiInstance<?> createInstance(UUID uuid) {
-        return new GuiInstance(this, uuid);
+    protected InventoryGui.GuiInstance<?> createInstance(long id, Map<String, Object> properties) {
+        return new GuiInstance(this, id, properties);
     }
 
     public static class GuiInstance extends InventoryGui.GuiInstance<ChestInventoryGui> {
 
-        public GuiInstance(@NonNull ChestInventoryGui gui, @NonNull UUID owner) {
-            super(gui, owner);
+        public GuiInstance(@NonNull ChestInventoryGui gui, long id, Map<String, Object> properties) {
+            super(gui, id, properties);
         }
 
         @Override
