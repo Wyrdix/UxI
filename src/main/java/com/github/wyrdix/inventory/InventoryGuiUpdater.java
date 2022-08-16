@@ -16,7 +16,7 @@ public class InventoryGuiUpdater implements Runnable {
         for (Integer integer : ImmutableSet.copyOf(INVENTORY_GUI.keySet())) {
             InventoryGui gui = InventoryGui.INVENTORY_GUIS.get(integer);
 
-            long delta = ((now - INVENTORY_GUI.get(integer)) * 20) / 100;
+            long delta = ((now - INVENTORY_GUI.get(integer)) * 20) / 1000;
 
             if (delta >= gui.getOptions().getGuiRefreshRate()) {
                 for (Player player : gui.getViewers()) {
