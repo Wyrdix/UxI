@@ -3,8 +3,6 @@ package com.github.wyrdix.inventory.component.click;
 import com.github.wyrdix.UxiPlugin;
 import com.github.wyrdix.inventory.InventoryGui;
 import com.github.wyrdix.inventory.event.InventoryGuiCloseEvent;
-import com.github.wyrdix.inventory.exceptions.InventoryGuiPlayerLimitException;
-import com.github.wyrdix.inventory.exceptions.UnknownPlayerException;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -15,6 +13,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 public class ChatStringInputListener implements Listener {
@@ -77,11 +76,8 @@ public class ChatStringInputListener implements Listener {
             clickingRunnable.currentlyTyping.remove(uuid);
 
             Bukkit.getScheduler().runTask(UxiPlugin.getInstance(), () -> {
-                try {
-                    gui.open(event.getPlayer());
-                } catch (UnknownPlayerException | InventoryGuiPlayerLimitException e) {
-                    e.printStackTrace();
-                }
+                clickingRunnable.onStringInputted(Objects.requireNonNull(gui.getInstance(uuid).orElse(null)),
+                        event.getPlayer());
             });
 
             event.setCancelled(true);

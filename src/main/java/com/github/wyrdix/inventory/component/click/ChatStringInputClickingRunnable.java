@@ -4,6 +4,8 @@ import com.github.wyrdix.inventory.GuiPosition;
 import com.github.wyrdix.inventory.InventoryGui;
 import com.github.wyrdix.inventory.component.ItemComponent;
 import com.github.wyrdix.inventory.event.InventoryGuiClickEvent;
+import com.github.wyrdix.inventory.exceptions.InventoryGuiPlayerLimitException;
+import com.github.wyrdix.inventory.exceptions.UnknownPlayerException;
 import com.github.wyrdix.inventory.section.GuiSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -35,4 +37,12 @@ public abstract class ChatStringInputClickingRunnable implements ItemComponent.C
     public abstract boolean check(@NonNull Player player, @NonNull String input);
 
     public abstract void onStringInput(@NonNull Player player, @NonNull String input);
+
+    public void onStringInputted(InventoryGui.GuiInstance<?> instance, Player player) {
+        try {
+            instance.getGui().open(player);
+        } catch (UnknownPlayerException | InventoryGuiPlayerLimitException e) {
+            e.printStackTrace();
+        }
+    }
 }
