@@ -3,7 +3,6 @@ package com.github.wyrdix.inventory;
 import com.github.wyrdix.inventory.exceptions.InventoryGuiSectionOutOfFields;
 import com.github.wyrdix.inventory.section.GuiSection;
 import org.apache.commons.lang.Validate;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -61,6 +60,10 @@ public class GuiPosition {
         this.y = y;
     }
 
+    public UnsafeGuiPosition toUnsafe() {
+        return new UnsafeGuiPosition(index, x, y);
+    }
+
     public @NonNull GuiSection getSection() {
         return section;
     }
@@ -87,7 +90,8 @@ public class GuiPosition {
         if (gui == getSection()) return this;
 
         List<GuiPosition> parentFields = getSection().getParentFields();
-        if (parentFields == null || parentFields.size() < index) throw new IllegalArgumentException("Trouble with projecting gui position");
+        if (parentFields == null || parentFields.size() < index)
+            throw new IllegalArgumentException("Trouble with projecting gui position");
         return parentFields.get(index).project(gui);
     }
 
