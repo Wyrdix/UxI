@@ -113,4 +113,15 @@ public class InventoryGuiClickEvent extends GuiEvent implements Cancellable {
     public Player getPlayer() {
         return player;
     }
+
+    @Override
+    public String toString() {
+        return "InventoryGuiClickEvent{" +
+               "section=" + section +
+               ", item=" + item +
+               ", position=" + position +
+               ", player=" + player +
+               ", cancelled=" + cancelled +
+               '}';
+    }
 }
