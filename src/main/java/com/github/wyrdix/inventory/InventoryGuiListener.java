@@ -71,7 +71,7 @@ public class InventoryGuiListener implements Listener {
 
     @EventHandler
     public void onClick(InventoryGuiClickEvent event) {
-        for (Component component : event.getSection().getComponents()) {
+        for (Component component : ImmutableList.copyOf(event.getSection().getComponents())) {
             if (component instanceof ClickReactionComponent react) {
                 react.onClick(event.getGui(), event.getPosition(), event.getInstance(), event.getPlayer());
             }
