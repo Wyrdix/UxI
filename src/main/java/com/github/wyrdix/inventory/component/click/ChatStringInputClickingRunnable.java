@@ -39,6 +39,7 @@ public abstract class ChatStringInputClickingRunnable implements ItemComponent.C
     public abstract void onStringInput(@NonNull Player player, @NonNull String input);
 
     public void onStringInputted(InventoryGui.GuiInstance<?> instance, Player player) {
+        if (instance == null) return;
         try {
             instance.getGui().open(player);
         } catch (UnknownPlayerException | InventoryGuiPlayerLimitException e) {

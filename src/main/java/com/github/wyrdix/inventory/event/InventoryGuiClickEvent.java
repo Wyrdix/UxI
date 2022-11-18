@@ -2,14 +2,12 @@ package com.github.wyrdix.inventory.event;
 
 import com.github.wyrdix.inventory.GuiPosition;
 import com.github.wyrdix.inventory.InventoryGui;
-import com.github.wyrdix.inventory.section.FreeSection;
 import com.github.wyrdix.inventory.section.GuiSection;
 import com.github.wyrdix.inventory.section.SlotSection;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -17,7 +15,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
 
-public class InventoryGuiClickEvent extends GuiEvent implements Cancellable {
+public class InventoryGuiClickEvent extends GuiEvent {
 
     private static final HandlerList HANDLER_LIST = new HandlerList();
     private final @NonNull GuiSection section;
@@ -57,11 +55,13 @@ public class InventoryGuiClickEvent extends GuiEvent implements Cancellable {
 
         InventoryGuiClickEvent event = new InventoryGuiClickEvent(nativeEvent, gui, instance, guiSection, guiSection.getFields().get(slot), player);
 
-        event.setCancelled(cancelled);
+        if (guiSection.isFree()) cancelled = false;
+
+        nativeEvent.setCancelled(cancelled);
 
         Bukkit.getPluginManager().callEvent(event);
 
-        cancelled = event.isCancelled();
+        cancelled = nativeEvent.isCancelled();
 
         List<GuiPosition> common;
 
@@ -76,7 +76,7 @@ public class InventoryGuiClickEvent extends GuiEvent implements Cancellable {
             }
         }
 
-        return (guiSection instanceof FreeSection) || cancelled;
+        return cancelled;
     }
 
     public @NonNull ItemStack getItem() {
@@ -86,16 +86,6 @@ public class InventoryGuiClickEvent extends GuiEvent implements Cancellable {
     @Override
     public @NonNull HandlerList getHandlers() {
         return HANDLER_LIST;
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return cancelled;
-    }
-
-    @Override
-    public void setCancelled(boolean cancel) {
-        this.cancelled = cancel;
     }
 
     public @NonNull GuiSection getSection() {

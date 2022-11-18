@@ -13,7 +13,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 public class ChatStringInputListener implements Listener {
@@ -76,8 +75,9 @@ public class ChatStringInputListener implements Listener {
             clickingRunnable.currentlyTyping.remove(uuid);
 
             Bukkit.getScheduler().runTask(UxiPlugin.getInstance(), () -> {
-                clickingRunnable.onStringInputted(Objects.requireNonNull(gui.getInstance(uuid).orElse(null)),
-                        event.getPlayer());
+                InventoryGui.GuiInstance<?> instance = gui.getInstance(uuid).orElse(null);
+                if (instance == null) return;
+                clickingRunnable.onStringInputted(instance, event.getPlayer());
             });
 
             event.setCancelled(true);

@@ -3,7 +3,6 @@ package com.github.wyrdix.inventory;
 import com.github.wyrdix.inventory.component.*;
 import com.github.wyrdix.inventory.event.*;
 import com.github.wyrdix.inventory.exceptions.InventoryGuiSectionOutOfFields;
-import com.github.wyrdix.inventory.section.FreeSection;
 import com.github.wyrdix.inventory.section.GuiSection;
 import com.google.common.collect.ImmutableList;
 import org.bukkit.entity.Player;
@@ -15,6 +14,7 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 
 import java.util.List;
 import java.util.Objects;
@@ -26,21 +26,18 @@ public class InventoryGuiListener implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
-        if (event.getAction().equals(InventoryAction.COLLECT_TO_CURSOR)) event.setCancelled(true);
         if (event.getClickedInventory() == null) return;
 
         Player player = (Player) event.getWhoClicked();
-
         InventoryGui.getOpenedInventory(player).ifPresent(gui -> {
-            if (event.getAction().equals(InventoryAction.COLLECT_TO_CURSOR)){
+            if (event.getAction().equals(InventoryAction.COLLECT_TO_CURSOR)) {
                 event.setCancelled(true);
                 event.getWhoClicked().getOpenInventory().setCursor(event.getCursor());
-            }else if (event.getRawSlot() != event.getSlot()) {
+            } else if (event.getRawSlot() >= gui.getSize()) {
                 if (event.isShiftClick()) event.setCancelled(true);
-            }else{
-                boolean cancelled = InventoryGuiClickEvent.generateEvent(event, gui, gui, gui.getInstance(player).orElseThrow(IllegalArgumentException::new), player, event.getSlot(), false);
-
-                event.setCancelled(!cancelled);
+            } else {
+                event.setCancelled(true);
+                InventoryGuiClickEvent.generateEvent(event, gui, gui, gui.getInstance(player).orElseThrow(IllegalArgumentException::new), player, event.getSlot(), true);
             }
 
         });
@@ -58,14 +55,41 @@ public class InventoryGuiListener implements Listener {
                     } catch (InventoryGuiSectionOutOfFields e) {
                         return null;
                     }
-                }).filter(Objects::nonNull).filter(s->!FreeSection.isFree(gui, s)).toList();
+                }).filter(Objects::nonNull).filter(s -> !GuiSection.isFree(gui, s)).toList();
 
-                if(!collect.isEmpty()) {
+                if (!collect.isEmpty()) {
                     event.setCancelled(true);
+                }
+                if (event.isCancelled()) {
                     player.setItemOnCursor(event.getOldCursor());
                 }
+
+                for (GuiPosition position : collect) {
+                    for (GuiSection section : instance.getGui().getSectionsContaining(position)) {
+                        processSectionDrag(instance, section, section.getFields().get(section.getParentFields().indexOf(position)), event);
+                    }
+                }
+
+
+                instance.updateInventory();
             });
         });
+    }
+
+    public void processSectionDrag(InventoryGui.GuiInstance<?> instance, GuiSection section, GuiPosition position, InventoryDragEvent event) {
+        for (Component component : section.getComponents()) {
+            if (!(component instanceof ItemComponent itemComponent)) continue;
+            if (!itemComponent.getPosition().equals(position)) return;
+
+            itemComponent.onDrag(instance, position, event);
+        }
+
+        for (GuiSection subSection : section.getSubSections()) {
+            int index = subSection.getParentFields().indexOf(position);
+            if (index == -1) continue;
+            GuiPosition child = subSection.getFields().get(index);
+            processSectionDrag(instance, subSection, child, event);
+        }
     }
 
 
@@ -77,12 +101,21 @@ public class InventoryGuiListener implements Listener {
             }
 
             if (component instanceof ItemComponent itemComponent) {
-                if (itemComponent.getPosition().equals(event.getPosition())) {
+                if (itemComponent.getPosition().project(event.getGui()).equals(event.getPosition().project(event.getGui()))) {
                     itemComponent.onClick(event, event.getSection(), event.getInstance(), event.getPlayer());
                 }
             }
 
         }
+
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onTeleport(PlayerTeleportEvent event) {
+        Player player = event.getPlayer();
+        InventoryGui.getOpenedInventory(player).ifPresent(gui -> {
+            gui.close(player);
+        });
 
     }
 
@@ -100,7 +133,6 @@ public class InventoryGuiListener implements Listener {
     public void onGuiClose(InventoryGuiCloseEvent event) {
         Player player = event.getPlayer();
         InventoryGui gui = event.getGui();
-
         if (gui.getOptions().isGuiCleanup()) {
             for (Component component : ImmutableList.copyOf(gui.getComponents())) {
                 if (component instanceof PersonalComponent personalComponent && personalComponent.getPlayer().equals(player)) {
@@ -113,8 +145,7 @@ public class InventoryGuiListener implements Listener {
     }
 
     private void onGuiClose(InventoryGuiCloseEvent event, GuiSection section) {
-        if (section instanceof FreeSection) ((FreeSection) section).onClose(event);
-
+        section.onClose(event);
         section.getSubSections().forEach(s -> onGuiClose(event, s));
     }
 

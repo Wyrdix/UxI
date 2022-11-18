@@ -13,6 +13,14 @@ public class SlotSection extends SimpleGuiSection {
         parentFields.add(parent.getFields().get(slot));
     }
 
+    public SlotSection(GuiSection parent, GuiPosition position) {
+        super(parent);
+
+        this.slot = position.getIndex();
+        fields.add(new GuiPosition(this, 0, 0, 0));
+        parentFields.add(parent.getFields().get(slot));
+    }
+
     public int getSlot() {
         return slot;
     }
@@ -20,11 +28,11 @@ public class SlotSection extends SimpleGuiSection {
     @Override
     public String toString() {
         return "SlotSection{" +
-                "fields=" + fields +
-                ", parentFields=" + parentFields +
-                ", components=" + getComponents() +
-                ", parent=" + getParent() +
-                ", slot=" + slot +
-                '}';
+               "fields=" + fields +
+               ", parentFields=" + parentFields +
+               ", components=" + getComponents() +
+               ", parent=" + getParent() +
+               ", slot=" + slot +
+               '}';
     }
 }

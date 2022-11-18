@@ -4,6 +4,7 @@ import com.github.wyrdix.inventory.GuiPosition;
 import com.github.wyrdix.inventory.InventoryGui;
 import com.github.wyrdix.inventory.component.Component;
 import com.github.wyrdix.inventory.component.ItemComponent;
+import com.github.wyrdix.inventory.event.InventoryGuiCloseEvent;
 import com.github.wyrdix.inventory.exceptions.InventoryGuiSectionOutOfFields;
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;
@@ -16,7 +17,16 @@ import java.util.stream.Stream;
 
 public interface GuiSection {
 
-    @Nullable List<GuiPosition> getParentFields();
+    static boolean isFree(GuiSection gui, GuiPosition position) {
+        if (gui.isFree()) return true;
+        for (GuiSection section : gui.getSectionsContaining(position)) {
+            List<GuiPosition> fields = section.getParentFields();
+            if (fields == null) continue;
+            if (isFree(section, section.getFields().get(fields.indexOf(position)))) return true;
+        }
+
+        return false;
+    }
 
     @NonNull List<GuiPosition> getFields();
 
@@ -93,10 +103,20 @@ public interface GuiSection {
 
     boolean removeComponent(@NonNull Component component);
 
+    @NonNull List<GuiPosition> getParentFields();
+
+    default boolean isFree() {
+        return false;
+    }
+
     Optional<InventoryGui.GuiInstance<?>> getInstance(UUID uuid);
 
     default Optional<InventoryGui.GuiInstance<?>> getInstance(Player player) {
         if (player == null) return Optional.empty();
         return getInstance(player.getUniqueId());
+    }
+
+    default void onClose(InventoryGuiCloseEvent event) {
+
     }
 }

@@ -10,6 +10,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -18,7 +19,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 public class ItemComponent implements PositionalComponent {
 
@@ -81,6 +81,10 @@ public class ItemComponent implements PositionalComponent {
     @SuppressWarnings("unused")
     public void onClick(InventoryGuiClickEvent event, GuiSection section, InventoryGui.GuiInstance<?> instance, Player player) {
         clickingRunnable.onClick(event, section, instance, player, position);
+    }
+
+    public boolean onDrag(InventoryGui.GuiInstance<?> gui, GuiPosition position, InventoryDragEvent event) {
+        return true;
     }
 
     @Override

@@ -198,18 +198,12 @@ public abstract class InventoryGui extends SimpleGuiSection {
             player.openInventory(instance.getInventory());
             return false;
         }
-
-        instance.setOpen(false);
+        boolean b = removeViewer(player.getUniqueId(), closeEvent.isInstanceRemoved());
 
         player.getPersistentDataContainer().set(INVENTORY_GUI_NAMESPACEKEY, PersistentDataType.INTEGER, -1);
 
-        if (closeEvent.isInstanceRemoved()) {
-            removeViewer(player.getUniqueId());
-        }
-
         if (onEvent || !player.getOpenInventory().getTopInventory().equals(instance.getInventory())) {
-            viewers.remove(player);
-            return false;
+            return b;
         }
 
         player.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
@@ -219,19 +213,31 @@ public abstract class InventoryGui extends SimpleGuiSection {
                 removeComponent(s);
         });
 
-        return viewers.remove(player);
+        return b;
     }
 
     public GuiOptions getOptions() {
         return options;
     }
 
-    public void removeViewer(UUID uuid) {
-        if (!viewerInstanceMap.containsKey(uuid)) return;
-        GuiInstance<?> instance = viewerInstanceMap.get(uuid);
+    public boolean removeViewer(UUID uuid, boolean guiCleanup) {
+        GuiInstance<?> instance = getInstance(uuid).orElse(null);
+        Player player = Bukkit.getPlayer(uuid);
+        if (instance == null || player == null || !player.isOnline()) return false;
+        boolean b = instance.viewers.remove(player.getUniqueId());
+        viewerInstanceMap.remove(player.getUniqueId());
 
-        if (options.isGuiCleanup() && instance.viewers.contains(uuid) && instance.viewers.size() == 1)
-            guiInstanceMap.remove(instance.getId());
+        if (instance.viewers.isEmpty()) {
+            instance.setOpen(false);
+            if (guiCleanup) {
+                guiInstanceMap.remove(instance.getId());
+            }
+        }
+        return b;
+    }
+
+    public void removeViewer(UUID uuid) {
+        removeViewer(uuid, getOptions().isGuiCleanup());
     }
 
     public boolean open(@NonNull Player player) throws UnknownPlayerException, InventoryGuiPlayerLimitException {
@@ -249,7 +255,6 @@ public abstract class InventoryGui extends SimpleGuiSection {
         GuiInstance<?> instance;
         if (existedBefore) instance = viewerInstanceMap.get(player.getUniqueId());
         else {
-
             long id;
 
             switch (options.getInstanceCreationConfig()) {
@@ -259,7 +264,7 @@ public abstract class InventoryGui extends SimpleGuiSection {
                     id = next_id;
                     break;
                 case WITH_ID:
-                    if (properties.containsKey("ID")) {
+                    if (!properties.containsKey("ID")) {
                         throw new IllegalArgumentException("No id has been provided but it is needed, please provide it in the properties map using key ID");
                     } else if (!(properties.get("ID") instanceof Number)) {
                         throw new IllegalArgumentException("An ID was provided but it's not a number");
@@ -272,9 +277,13 @@ public abstract class InventoryGui extends SimpleGuiSection {
             }
 
             properties.put("ID", id);
-            if(getOptions().isInstanceOwn()) properties.put("OWNER", player.getUniqueId());
-
-            instance = createInstance(id, properties);
+            if (getOptions().isInstanceOwn()) properties.put("OWNER", player.getUniqueId());
+            if (guiInstanceMap.containsKey(id)) {
+                instance = guiInstanceMap.get(id);
+            } else {
+                instance = createInstance(id, properties);
+                guiInstanceMap.put(id, instance);
+            }
         }
 
         InventoryGuiOpenEvent event = new InventoryGuiOpenEvent(this, instance, player);
@@ -282,13 +291,14 @@ public abstract class InventoryGui extends SimpleGuiSection {
         if (event.isCancelled()) return false;
 
         viewers.add(player);
-        player.getPersistentDataContainer().set(INVENTORY_GUI_NAMESPACEKEY, PersistentDataType.INTEGER, id);
-        if (!existedBefore) viewerInstanceMap.put(player.getUniqueId(), instance);
-
-        instance.sectionPropertyMap.computeIfAbsent(this, (a) -> new HashMap<>()).putAll(properties);
+        instance.viewers.add(player.getUniqueId());
 
         instance.updateInventory();
         player.openInventory(instance.inventory);
+
+        player.getPersistentDataContainer().set(INVENTORY_GUI_NAMESPACEKEY, PersistentDataType.INTEGER, id);
+        if (!existedBefore) viewerInstanceMap.put(player.getUniqueId(), instance);
+
         instance.setOpen(true);
 
 
@@ -333,6 +343,7 @@ public abstract class InventoryGui extends SimpleGuiSection {
         protected Inventory inventory;
         private boolean isOpen = false;
         private String oldTitle;
+        private final Map<GuiPosition, ItemStack> changeStack = new HashMap<>();
 
 
 
@@ -340,7 +351,8 @@ public abstract class InventoryGui extends SimpleGuiSection {
 
             this.gui = gui;
             this.id = id;
-            this.owner = (UUID) Optional.of(properties.get("OWNER")).orElse(null);
+            this.owner = (UUID) properties.get("OWNER");
+            this.sectionPropertyMap.computeIfAbsent(gui, guiSection -> new HashMap<>()).putAll(properties);
 
 
             oldTitle = getTitle();
@@ -373,6 +385,10 @@ public abstract class InventoryGui extends SimpleGuiSection {
                 if (!oldTitle.equals(title)) {
                     oldTitle = title;
                     inventory = createInventory(oldTitle);
+                    for (UUID viewer : getViewers()) {
+                        Player pl = Bukkit.getPlayer(viewer);
+                        if (pl != null && pl.isOnline()) pl.openInventory(inventory);
+                    }
                 }
             }
             Optional<ItemPanelComponent> opt = gui.getFromComponent(ItemPanelComponent.class);
@@ -385,6 +401,13 @@ public abstract class InventoryGui extends SimpleGuiSection {
                 }
             });
             recUpdate(gui);
+
+            for (Map.Entry<GuiPosition, ItemStack> entry : changeStack.entrySet()) {
+                GuiPosition position = entry.getKey();
+                ItemStack item = entry.getValue();
+                getInventory().setItem(position.getIndex(), item);
+            }
+            changeStack.clear();
         }
 
         public void update(GuiPosition position) {
@@ -397,7 +420,7 @@ public abstract class InventoryGui extends SimpleGuiSection {
         }
 
         public void setItem(GuiPosition position, ItemStack stack) {
-            getInventory().setItem(position.getIndex(), stack);
+            changeStack.put(position, stack);
         }
 
         public Inventory getInventory() {
