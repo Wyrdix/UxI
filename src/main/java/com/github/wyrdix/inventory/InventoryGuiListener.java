@@ -37,7 +37,7 @@ public class InventoryGuiListener implements Listener {
                 if (event.isShiftClick()) event.setCancelled(true);
             } else {
                 event.setCancelled(true);
-                InventoryGuiClickEvent.generateEvent(event, gui, gui, gui.getInstance(player).orElseThrow(IllegalArgumentException::new), player, event.getSlot(), true);
+                InventoryGuiClickEvent.generateEvent(event, gui, gui, gui.getInstance(player).orElseThrow(IllegalArgumentException::new), player, event.getRawSlot(), true);
             }
 
         });

@@ -49,11 +49,12 @@ public class InventoryGuiClickEvent extends GuiEvent {
     public static boolean generateEvent(@NonNull InventoryClickEvent nativeEvent, @NonNull InventoryGui gui, @NonNull GuiSection guiSection, InventoryGui.@NonNull GuiInstance<?> instance, Player player, int slot, boolean cancelled) {
         Validate.notNull(guiSection);
         Validate.notNull(instance);
-        Validate.isTrue(slot >= 0 && slot < gui.getFields().size(), slot + " isn't between 0 and " + (gui.getFields().size() - 1));
+        Validate.isTrue(slot >= 0 && slot < guiSection.getFields().size(), slot + " isn't between 0 and " + (gui.getFields().size() - 1));
 
         SlotSection slotSection = new SlotSection(guiSection, slot);
 
-        InventoryGuiClickEvent event = new InventoryGuiClickEvent(nativeEvent, gui, instance, guiSection, guiSection.getFields().get(slot), player);
+        GuiPosition position = guiSection.getFields().get(slot);
+        InventoryGuiClickEvent event = new InventoryGuiClickEvent(nativeEvent, gui, instance, guiSection, position, player);
 
         if (guiSection.isFree()) cancelled = false;
 

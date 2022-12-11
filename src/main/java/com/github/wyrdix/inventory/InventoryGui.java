@@ -129,7 +129,7 @@ public abstract class InventoryGui extends SimpleGuiSection {
         Validate.notNull(position);
         Validate.notNull(instance);
 
-        return instance.getInventory().getItem(position.getIndex());
+        return instance.getItem(position);
     }
 
     @Override
@@ -405,7 +405,7 @@ public abstract class InventoryGui extends SimpleGuiSection {
             for (Map.Entry<GuiPosition, ItemStack> entry : changeStack.entrySet()) {
                 GuiPosition position = entry.getKey();
                 ItemStack item = entry.getValue();
-                getInventory().setItem(position.getIndex(), item);
+                setItemNative(position, item);
             }
             changeStack.clear();
         }
@@ -421,6 +421,18 @@ public abstract class InventoryGui extends SimpleGuiSection {
 
         public void setItem(GuiPosition position, ItemStack stack) {
             changeStack.put(position, stack);
+        }
+
+        public ItemStack getItem(GuiPosition position) {
+            return changeStack.getOrDefault(position, getItemNative(position.project(getGui())));
+        }
+
+        public void setItemNative(GuiPosition position, ItemStack stack) {
+            inventory.setItem(position.getIndex(), stack);
+        }
+
+        public ItemStack getItemNative(GuiPosition position) {
+            return inventory.getItem(position.getIndex());
         }
 
         public Inventory getInventory() {
