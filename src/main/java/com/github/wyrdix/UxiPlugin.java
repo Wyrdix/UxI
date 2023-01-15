@@ -41,7 +41,7 @@ public class UxiPlugin extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new InventoryGuiListener(), this);
 
         //Extra Listener
-        Bukkit.getPluginManager().registerEvents(new ChatStringInputListener(), this);
+        Bukkit.getPluginManager().registerEvents(ChatStringInputListener.getInstance(), this);
 
         //Task
         Bukkit.getScheduler().runTaskTimer(this, new InventoryGuiUpdater(), 0, 1);
