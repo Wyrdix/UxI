@@ -28,11 +28,15 @@ public class ItemComponent implements PositionalComponent {
     private final ClickingRunnable clickingRunnable;
     private final CreateRunnable createRunnable;
 
+    public static ItemComponent empty(GuiPosition position) {
+        return new ItemComponent(position, null);
+    }
 
     public ItemComponent(@NonNull GuiPosition position, @Nullable ItemStack stack) {
         this(position, stack, (event, section, instance, player, pos) -> {
         }, (gui, instance, itemStack) -> itemStack);
     }
+
     public ItemComponent(@NonNull GuiPosition position, @Nullable ItemStack stack, @NonNull CreateRunnable createRunnable) {
         this(position, stack, (event, section, instance, player, pos) -> {
         }, createRunnable);
