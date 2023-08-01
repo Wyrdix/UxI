@@ -13,6 +13,11 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  release:
+    types: [created]
+
+env:
+  snapshotVersion: "1.4-SNAPSHOT"
 
 jobs:
   build:
