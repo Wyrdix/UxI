@@ -49,19 +49,22 @@ public abstract class PaginatedSection extends SimpleGuiSection {
 
         if (index >= getSize(instance)) return new ItemStack(Material.AIR);
 
-        return getItem(instance, position, index).getItem(gui, instance);
+        ItemComponent item = getItem(instance, position, index);
+
+        return item.getItem(gui, instance);
     }
 
     protected void onClick(InventoryGuiClickEvent event, GuiSection section, InventoryGui.GuiInstance<?> instance, Player player, GuiPosition pos, int index) {
 
         if (index >= getSize(instance)) return;
 
-        getItem(instance, pos, index).onClick(event, section, instance, player);
+        ItemComponent item = getItem(instance, pos, index);
+        item.onClick(event, section, instance, player);
     }
 
     public abstract int getSize(InventoryGui.GuiInstance<?> instance);
 
-    public abstract ItemComponent getItem(InventoryGui.GuiInstance<?> instance, GuiPosition position, int index);
+    public abstract @NonNull ItemComponent getItem(InventoryGui.GuiInstance<?> instance, GuiPosition position, int index);
 
     public int getPage(InventoryGui.@NotNull GuiInstance<?> instance) {
         return instance.<Integer>get(this, "page").orElse(0);
