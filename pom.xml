@@ -18,8 +18,9 @@
 
     <distributionManagement>
         <repository>
-            <id>labocraft-repository</id>
-            <url>${labocraft.url}/${labocraft.path}/release/</url>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/wyrdix/uxi</url>
         </repository>
     </distributionManagement>
 
